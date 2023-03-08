@@ -41,7 +41,7 @@ class JWTService(@Value("\${jwt.secretAccess}") val secret: String,
         return generate(user.username, refreshTokenExpiration, user.roles, refresh)
     }
 
-    override fun decodedRefreshToken(refreshToken: String): DecodedJWT {
+    override fun decodeRefreshToken(refreshToken: String): DecodedJWT {
         return decode(refresh, refreshToken)
     }
 
@@ -54,7 +54,7 @@ class JWTService(@Value("\${jwt.secretAccess}") val secret: String,
 
 
     override fun refreshIsExpired(token: String) =
-        decodedRefreshToken(token).expiresAt.after(Date())
+        decodeRefreshToken(token).expiresAt.after(Date())
 
 
     override fun accessIsExpired(token: String) =

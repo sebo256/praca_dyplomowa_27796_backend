@@ -10,7 +10,7 @@ interface IJWTService {
     fun accessToken(user: User): String
     fun decodeAccessToken(accessToken: String): DecodedJWT
     fun refreshToken(user: User): String
-    fun decodedRefreshToken(refreshToken: String): DecodedJWT
+    fun decodeRefreshToken(refreshToken: String): DecodedJWT
     fun getRoles(decodedJWT: DecodedJWT): List<SimpleGrantedAuthority>
     fun isValid(token: String, user: UserDetails?): Boolean
     fun refreshIsExpired(token: String): Boolean
