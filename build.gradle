@@ -41,6 +41,9 @@ dependencies {
 	implementation 'io.reactivex.rxjava3:rxkotlin:3.0.1'
 	implementation 'io.reactivex.rxjava3:rxjava:3.1.5'
 
+	//JWT
+	implementation 'com.auth0:java-jwt:4.3.0'
+
 	//Other
 	implementation 'com.google.code.gson:gson:2.10'
 

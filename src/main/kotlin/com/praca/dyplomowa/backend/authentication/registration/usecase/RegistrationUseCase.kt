@@ -32,7 +32,7 @@ class RegistrationUseCase(val logger: IApplicationLogger): IRegistrationUseCase 
                 it.toRegistrationResponse()
             }
             .onErrorReturn {
-                logger.warn("Registration failed. User with given email or login already exists $it")
+                logger.warn("Registration failed. User with given username already exist $it")
                     RegistrationResponse(
                             status = false,
                             account = null,

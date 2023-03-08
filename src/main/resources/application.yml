@@ -4,3 +4,9 @@ spring:
       host: localhost
       port: 27017
       database: praca_dyplomowa
+jwt:
+  cookieName: pdyplomowa-refersh
+  secretAccess: 2d1d0cb8c339a7951b957af389f400c5502a5dbb936ecc17ab096eb4eb52fec309d3599cbc1cc242012d0d1bcf85522e7a2c94570925ab911724d1a0bd19e70f
+  secretRefresh: 0dc81f389df23bf0d5b86a1285935c7bc90ec89cd07469e5fb91bde9f84bfa5d5f38ce81a0b8476442cc407788e153b66a2177d8ffc168cae6e235b28bf80771
+  expirationInMs: 3600000
+  refreshExpirationInMs: 604800000
