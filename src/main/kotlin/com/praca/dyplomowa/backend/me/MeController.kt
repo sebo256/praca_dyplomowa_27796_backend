@@ -3,7 +3,6 @@ package com.praca.dyplomowa.backend.me
 import com.praca.dyplomowa.backend.me.models.MeRequest
 import com.praca.dyplomowa.backend.me.models.MeResponse
 import com.praca.dyplomowa.backend.me.usecase.IMeUsecase
-import io.reactivex.rxjava3.core.Single
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
