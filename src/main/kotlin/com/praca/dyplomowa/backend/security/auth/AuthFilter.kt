@@ -18,11 +18,8 @@ class AuthFilter(private val jwtService: IJWTService) : WebFilter {
                         val auth = UsernamePasswordAuthenticationToken(token.subject, null, jwtService.getRoles(token))
                         return chain.filter(exchange).contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth))
                     }
-                    .onFailure {
-                        return chain.filter(exchange).contextWrite(ReactiveSecurityContextHolder.clearContext())
-                    }
                     .getOrElse {
-                        return chain.filter(exchange)
+                        return chain.filter(exchange).contextWrite(ReactiveSecurityContextHolder.clearContext())
                     }
 
 
