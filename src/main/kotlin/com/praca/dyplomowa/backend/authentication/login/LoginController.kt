@@ -44,7 +44,7 @@ class LoginController(val loginUseCase: LoginUseCase) {
                                         .build()
                                 ResponseEntity
                                         .ok()
-                                        .header("Set-Coookie", authCookie.toString())
+                                        .header("Set-Cookie", authCookie.toString())
                                         .body(it.toLoginResponse())
                             }
                         }

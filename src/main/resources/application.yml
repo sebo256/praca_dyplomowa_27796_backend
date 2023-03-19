@@ -4,6 +4,7 @@ spring:
       host: localhost
       port: 27017
       database: praca_dyplomowa
+      auto-index-creation: true
 jwt:
   cookieName: pdyplomowa-refersh
   secretAccess: 2d1d0cb8c339a7951b957af389f400c5502a5dbb936ecc17ab096eb4eb52fec309d3599cbc1cc242012d0d1bcf85522e7a2c94570925ab911724d1a0bd19e70f

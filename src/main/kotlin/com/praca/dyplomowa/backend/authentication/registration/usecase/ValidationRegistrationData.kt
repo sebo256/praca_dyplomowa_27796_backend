@@ -33,10 +33,10 @@ class ValidationRegistrationData(val data: RegistrationRequest) {
             username.length > 3 && username.length < 20 && username.contains(USERNAME_PATTERN)
 
     private fun validatePassword(password: String) =
-            password.length > 6 && password.length < 20 && password.contains(PASSWORD_PATTERN)
+            password.length > 7 && password.length < 30 && password.contains(PASSWORD_PATTERN)
 
     private fun validateNameAndSurname(name: String) =
-            name.length > 3 && name.length < 25 && name.contains(NAME_PATTERN)
+            name.length > 2 && name.length < 25 && name.contains(NAME_PATTERN)
 
     private val statusMessage: (Boolean, String) -> String? = { status, message ->
         when(status) {
@@ -46,8 +46,8 @@ class ValidationRegistrationData(val data: RegistrationRequest) {
     }
 
     companion object{
-        val PASSWORD_PATTERN = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#\$%]).{8,20}\$".toRegex()
-        val USERNAME_PATTERN = "^[a-zA-Z0-9._-]{3,}\$".toRegex()
+        val PASSWORD_PATTERN = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#\$%]).{8,30}\$".toRegex()
+        val USERNAME_PATTERN = "^[a-zA-Z0-9._-]{4,}\$".toRegex()
         val NAME_PATTERN = "[A-Za-zżźćńółęąśŻŹĆĄŚĘŁÓŃ]{1,25}['-]{0,2}[A-Za-zżźćńółęąśŻŹĆĄŚĘŁÓŃ]{1,25}['-]{0,2}[A-Za-zżźćńółęąśŻŹĆĄŚĘŁÓŃ]{1,25}".toRegex()
     }
 

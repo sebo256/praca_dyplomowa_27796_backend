@@ -18,6 +18,4 @@ data class User(
         val surname: String,
         val roles: Collection<String>,
         val refreshToken: String? = null,
-//        @DocumentReference
-//        val job: Collection<Job>? = null
 )
