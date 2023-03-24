@@ -24,39 +24,7 @@ class JobUseCase(
     private fun saveJob(request: JobRequest, user: User) =
             jobRepository.save(request.toJob(user)).map { it.toNewJobResponse() }
 
-    private fun errorResponse() =
-            JobResponse(
-                    status = false,
-                    message = "Something went wrong"
-            )
-
-    private fun Job.toNewJobResponse() =
-            JobResponse(
-                    id = this.id,
-                    status = true,
-                    message = "Succesfully created new job"
-            )
-
-    private fun JobRequest.toJob(user: User) =
-            Job(
-                    companyName = this.companyName,
-                    name = this.name,
-                    surname = this.surname,
-                    street = this.street,
-                    postalCode = this.postalCode,
-                    city = this.city,
-                    phoneNumber = this.phoneNumber,
-                    email = this.email,
-                    subject = this.subject,
-                    dateOfCreation = this.dateOfCreation,
-                    plannedDate = this.plannedDate,
-                    timeSpent = this.timeSpent,
-                    note = this.note,
-                    isCompleted = this.isCompleted,
-                    createdBy = user
-            )
-
-    override fun addJobAppliedTo(request: JobApplyToRequest): Single<JobResponse> =
+    override fun addJobApplyTo(request: JobApplyToRequest): Single<JobResponse> =
             jobRepository.findById(request.objectId).toSingle().flatMap { saveJob(it.copy(jobAppliedTo = request.jobAppliedTo)) }
 
     fun saveJob(job: Job) =
@@ -71,6 +39,55 @@ class JobUseCase(
                 )
             }
 
+    override fun getJobById(objectId: String): Single<JobGetAllResponse> =
+            jobRepository.findById(objectId).toSingle().map { it.toJobResponse() }
+
+    override fun getJobAppliedTo(objectId: String): Single<JobAppliedToResponse> =
+            jobRepository.findById(objectId).toSingle().map { it.toGetJobAppliedToResponse() }
+
+    private fun errorResponse() =
+            JobResponse(
+                    status = false,
+                    message = "Something went wrong"
+            )
+
+    private fun Job.toNewJobResponse() =
+            JobResponse(
+                    id = this.id,
+                    status = true,
+                    message = "Succesfully created new job"
+            )
+
+    private fun Job.toGetJobAppliedToResponse() =
+            JobAppliedToResponse(
+                    id = this.id,
+                    status = true,
+                    message = "Sucessfuly get users applied to this job",
+                    jobAppliedTo = this.jobAppliedTo?: listOf()
+            )
+
+    private fun JobRequest.toJob(user: User) =
+            Job(
+                    companyName = this.companyName,
+                    name = this.name,
+                    surname = this.surname,
+                    street = this.street,
+                    postalCode = this.postalCode,
+                    city = this.city,
+                    phoneNumber = this.phoneNumber,
+                    email = this.email,
+                    subject = this.subject,
+                    jobType = this.jobType,
+                    dateOfCreation = this.dateOfCreation,
+                    plannedDate = this.plannedDate,
+                    timeSpent = this.timeSpent,
+                    note = this.note,
+                    isCompleted = this.isCompleted,
+                    createdBy = user
+            )
+
+
+
     private fun Job.toJobResponse()=
             JobGetAllResponse(
                     id = this.id,
@@ -83,6 +100,7 @@ class JobUseCase(
                     phoneNumber = this.phoneNumber,
                     email = this.email,
                     subject = this.subject,
+                    jobType = this.jobType,
                     dateOfCreation = this.dateOfCreation,
                     plannedDate = this.plannedDate,
                     timeSpent = this.timeSpent,
@@ -107,10 +125,14 @@ class JobUseCase(
                     phoneNumber = request.phoneNumber,
                     email = request.email,
                     subject =  request.subject,
+                    jobType = request.jobType,
                     plannedDate = request.plannedDate,
                     timeSpent = request.timeSpent,
                     note = request.note,
-                    isCompleted = request.isCompleted
+                    isCompleted = request.isCompleted,
+
             )) }
+
+
 
 }

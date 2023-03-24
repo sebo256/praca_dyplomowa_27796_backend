@@ -7,10 +7,14 @@ interface IJobUseCase {
 
     fun createJob(request: JobRequest): Single<JobResponse>
 
-    fun addJobAppliedTo(request: JobApplyToRequest): Single<JobResponse>
+    fun addJobApplyTo(request: JobApplyToRequest): Single<JobResponse>
 
     fun getJobs(): Single<JobGetAllResponseCollection>
 
+    fun getJobById(objectId: String): Single<JobGetAllResponse>
+
     fun updateJob(request: JobRequestUpdate): Single<JobResponse>
+
+    fun getJobAppliedTo(objectId: String): Single<JobAppliedToResponse>
 
 }

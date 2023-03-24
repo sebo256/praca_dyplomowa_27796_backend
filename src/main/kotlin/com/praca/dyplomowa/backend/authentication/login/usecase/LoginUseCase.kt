@@ -56,6 +56,7 @@ class LoginUseCase(
             AuthResponse(
                     jwt = jwtService.accessToken(this),
                     refreshToken = this.refreshToken,
-                    message = "Successfully logged-in"
+                    message = "Successfully logged-in",
+                    username = this.username
             )
 }

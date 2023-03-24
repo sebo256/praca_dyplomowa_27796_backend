@@ -54,7 +54,8 @@ class LoginController(val loginUseCase: LoginUseCase) {
     private fun AuthResponse.toLoginResponse() =
             LoginResponse(
                     jwt = this.jwt,
-                    message = this.message
+                    message = this.message,
+                    username = this.username
             )
 
 }

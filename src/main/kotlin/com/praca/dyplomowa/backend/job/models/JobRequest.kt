@@ -12,6 +12,7 @@ data class JobRequest(
         val phoneNumber: String?,
         val email: String?,
         val subject: String,
+        val jobType: String,
         val dateOfCreation: Long,
         val plannedDate: Long?,
         val timeSpent: Int,
