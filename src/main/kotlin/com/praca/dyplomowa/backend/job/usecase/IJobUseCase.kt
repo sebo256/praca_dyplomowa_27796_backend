@@ -17,4 +17,5 @@ interface IJobUseCase {
 
     fun getJobAppliedTo(objectId: String): Single<JobAppliedToResponse>
 
+    fun deleteJob(objectId: String): Single<JobResponse>
 }

@@ -7,5 +7,6 @@ import org.bson.types.ObjectId
 data class LoginResponse(
         val jwt: String? = null,
         val message: String,
-        val username: String? = null
+        val username: String? = null,
+        val roles: Collection<String>
 )

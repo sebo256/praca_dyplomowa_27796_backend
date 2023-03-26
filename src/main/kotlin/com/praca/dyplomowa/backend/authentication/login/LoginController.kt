@@ -55,7 +55,8 @@ class LoginController(val loginUseCase: LoginUseCase) {
             LoginResponse(
                     jwt = this.jwt,
                     message = this.message,
-                    username = this.username
+                    username = this.username,
+                    roles = this.roles!!
             )
 
 }

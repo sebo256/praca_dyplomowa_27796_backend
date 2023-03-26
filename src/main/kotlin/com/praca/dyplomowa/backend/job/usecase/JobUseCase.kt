@@ -6,7 +6,12 @@ import com.praca.dyplomowa.backend.mongoDb.User
 import com.praca.dyplomowa.backend.mongoDb.repository.JobRepository
 import com.praca.dyplomowa.backend.mongoDb.repository.UserRepository
 import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.kotlin.subscribeBy
+import org.springframework.data.domain.Sort
+import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 
 @Service
 class JobUseCase(
@@ -31,7 +36,7 @@ class JobUseCase(
             jobRepository.save(job).map { it.toNewJobResponse() }
 
     override fun getJobs(): Single<JobGetAllResponseCollection> =
-            jobRepository.findAll().toList().map {
+            jobRepository.findAll(Sort.by(Sort.Direction.DESC, "dateOfCreation")).toList().map {
                 JobGetAllResponseCollection(
                         it.map {
                             it.toJobResponse()
@@ -45,10 +50,26 @@ class JobUseCase(
     override fun getJobAppliedTo(objectId: String): Single<JobAppliedToResponse> =
             jobRepository.findById(objectId).toSingle().map { it.toGetJobAppliedToResponse() }
 
+
+    override fun deleteJob(objectId: String): Single<JobResponse> =
+            jobRepository.existsById(objectId).flatMap { status ->
+                when(status){
+                    true -> jobRepository.deleteById(objectId).toSingleDefault(deleteResponse())
+                    false -> Single.error(ResponseStatusException(HttpStatus.BAD_REQUEST))
+                }
+            }
+
     private fun errorResponse() =
             JobResponse(
                     status = false,
                     message = "Something went wrong"
+            )
+
+
+    private fun deleteResponse() =
+            JobResponse(
+                    status = true,
+                    message = "Successfully deleted job"
             )
 
     private fun Job.toNewJobResponse() =
