@@ -1,5 +1,6 @@
 package com.praca.dyplomowa.backend.authentication.login.usecase
 
+import com.auth0.jwt.exceptions.TokenExpiredException
 import com.praca.dyplomowa.backend.authentication.login.models.AuthResponse
 import com.praca.dyplomowa.backend.authentication.login.models.LoginRequest
 import com.praca.dyplomowa.backend.logger.IApplicationLogger
@@ -26,7 +27,11 @@ class LoginUseCase(
                     }
                 }
                 .onErrorReturn {
-                    logger.warn("Login failed, user with given username not exist. $it")
+                    if(it is TokenExpiredException){
+                        logger.warn("Token expired")
+                    } else {
+                        logger.warn("Login failed, user with given username not exist. $it")
+                    }
                     errorResponse()
                 }
 
@@ -43,14 +48,18 @@ class LoginUseCase(
     private fun updateUser(user: User) =
             userRepository.save(user).map{it.successResponse()}
 
-    private fun checkRefreshToken(user: User): String{
-        if(user.refreshToken.isNullOrBlank()) return jwtService.refreshToken(user)
+    private fun checkRefreshToken(user: User)=
+            jwtService.refreshToken(user)
 
-        return when(jwtService.refreshIsExpired(user.refreshToken)){
-            true -> jwtService.refreshToken(user)
-            false -> user.refreshToken!!
-        }
-    }
+//        return runCatching { jwtService.decodeRefreshToken(user.refreshToken).token }
+//                .onFailure { jwtService.refreshToken(user) }
+//                .getOrThrow()
+//        return when(jwtService.refreshIsExpired(user.refreshToken)){
+//            true -> jwtService.refreshToken(user)
+//            false -> user.refreshToken!!
+//        }
+//        return null
+
 
     private fun User.successResponse() =
             AuthResponse(
