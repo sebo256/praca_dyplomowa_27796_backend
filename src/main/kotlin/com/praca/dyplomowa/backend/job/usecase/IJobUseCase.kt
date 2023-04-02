@@ -11,11 +11,15 @@ interface IJobUseCase {
 
     fun getJobs(): Single<JobGetAllResponseCollection>
 
+    fun getDatesAndInfo(): Single<JobGetDatesAndInfoResponseCollection>
+
     fun getJobById(objectId: String): Single<JobGetAllResponse>
 
-    fun updateJob(request: JobRequestUpdate): Single<JobResponse>
-
     fun getJobAppliedTo(objectId: String): Single<JobAppliedToResponse>
+
+    fun getJobByLongDateBetween(startLong: Long, endLong: Long): Single<JobGetAllResponseCollection>
+
+    fun updateJob(request: JobRequestUpdate): Single<JobResponse>
 
     fun deleteJob(objectId: String): Single<JobResponse>
 }

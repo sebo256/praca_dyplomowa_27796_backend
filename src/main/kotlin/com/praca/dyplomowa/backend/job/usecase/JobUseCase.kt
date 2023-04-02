@@ -44,11 +44,30 @@ class JobUseCase(
                 )
             }
 
+    override fun getDatesAndInfo(): Single<JobGetDatesAndInfoResponseCollection> =
+            jobRepository.findAll().filter { it.plannedDate != null }.toList().map {
+                        JobGetDatesAndInfoResponseCollection(
+                            it.map {
+                                it.toGetDatesAndInfoResponse()
+                            }
+                )
+            }
+
+
     override fun getJobById(objectId: String): Single<JobGetAllResponse> =
             jobRepository.findById(objectId).toSingle().map { it.toJobResponse() }
 
     override fun getJobAppliedTo(objectId: String): Single<JobAppliedToResponse> =
             jobRepository.findById(objectId).toSingle().map { it.toGetJobAppliedToResponse() }
+
+    override fun getJobByLongDateBetween(startLong: Long, endLong: Long): Single<JobGetAllResponseCollection> =
+            jobRepository.findAllByPlannedDateBetween(startLong,endLong).toList().map {
+                JobGetAllResponseCollection(
+                        it.map {
+                            it.toJobResponse()
+                        }
+                )
+            }
 
 
     override fun deleteJob(objectId: String): Single<JobResponse> =
@@ -85,6 +104,14 @@ class JobUseCase(
                     status = true,
                     message = "Sucessfuly get users applied to this job",
                     jobAppliedTo = this.jobAppliedTo?: listOf()
+            )
+
+    private fun Job.toGetDatesAndInfoResponse() =
+            JobGetDatesAndInfoResponse(
+                    id = this.id,
+                    subject = this.subject,
+                    plannedDate = this.plannedDate,
+                    isCompleted = this.isCompleted
             )
 
     private fun JobRequest.toJob(user: User) =
