@@ -21,6 +21,11 @@ class UserUseCase(
             )
         }
 
+    override fun getUser(username: String): Single<UserGetAllResponse> =
+        userRepository.findByUsername(username).map {
+            it.toUserGetAllResponseCollection()
+        }
+
 
     private fun User.toUserGetAllResponseCollection() =
             UserGetAllResponse(

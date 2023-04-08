@@ -1,9 +1,11 @@
 package com.praca.dyplomowa.backend.user
 
+import com.praca.dyplomowa.backend.user.models.UserGetAllResponse
 import com.praca.dyplomowa.backend.user.models.UserGetAllResponseCollection
 import com.praca.dyplomowa.backend.user.usecase.IUserUseCase
 import io.reactivex.rxjava3.core.Single
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -14,5 +16,9 @@ class UserController(private val userUseCase: IUserUseCase) {
     @GetMapping
     fun getUsers(): Single<UserGetAllResponseCollection> =
             userUseCase.getUsers()
+
+    @GetMapping("/{username}")
+    fun getUser(@PathVariable username: String): Single<UserGetAllResponse> =
+            userUseCase.getUser(username)
 
 }

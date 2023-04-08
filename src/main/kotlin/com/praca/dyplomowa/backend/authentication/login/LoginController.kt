@@ -4,7 +4,6 @@ import com.praca.dyplomowa.backend.authentication.login.models.AuthResponse
 import com.praca.dyplomowa.backend.authentication.login.models.LoginRequest
 import com.praca.dyplomowa.backend.authentication.login.models.LoginResponse
 import com.praca.dyplomowa.backend.authentication.login.usecase.LoginUseCase
-import io.reactivex.rxjava3.core.Single
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity

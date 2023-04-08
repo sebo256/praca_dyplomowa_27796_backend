@@ -6,12 +6,12 @@ import com.praca.dyplomowa.backend.mongoDb.User
 import com.praca.dyplomowa.backend.mongoDb.repository.JobRepository
 import com.praca.dyplomowa.backend.mongoDb.repository.UserRepository
 import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.kotlin.subscribeBy
 import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
+import java.time.Instant
+import java.time.ZoneId
 
 @Service
 class JobUseCase(
@@ -44,6 +44,16 @@ class JobUseCase(
                 )
             }
 
+    override fun getJobsForList(): Single<JobGetForListResponseCollection> =
+            jobRepository.findAll(Sort.by(Sort.Direction.DESC, "dateOfCreation")).toList().map {
+                JobGetForListResponseCollection(
+                        it.map{
+                            it.toJobForListResponse()
+                        }
+                )
+            }
+
+
     override fun getDatesAndInfo(): Single<JobGetDatesAndInfoResponseCollection> =
             jobRepository.findAll().filter { it.plannedDate != null }.toList().map {
                         JobGetDatesAndInfoResponseCollection(
@@ -60,8 +70,21 @@ class JobUseCase(
     override fun getJobAppliedTo(objectId: String): Single<JobAppliedToResponse> =
             jobRepository.findById(objectId).toSingle().map { it.toGetJobAppliedToResponse() }
 
+    override fun getJobsAppliedToUserAndCheckCompleted(username: String, isCompleted: Boolean): Single<JobGetForListResponseCollection> =
+            jobRepository.findAllByJobAppliedToContainingAndIsCompleted(jobAppliedTo = username, isCompleted = isCompleted).toList().map {
+                JobGetForListResponseCollection(
+                        it.map{
+                            it.toJobForListResponse()
+                        }
+                )
+            }
+
+    override fun countJobsAppliedToUserAndCheckCompleted(username: String, isCompleted: Boolean): Single<Long> =
+            jobRepository.countAllByJobAppliedToContainingAndIsCompleted(username, isCompleted)
+
+
     override fun getJobByLongDateBetween(startLong: Long, endLong: Long): Single<JobGetAllResponseCollection> =
-            jobRepository.findAllByPlannedDateBetween(startLong,endLong).toList().map {
+            jobRepository.findAllByPlannedDateBetween(startLong = startLong, endLong = endLong).toList().map {
                 JobGetAllResponseCollection(
                         it.map {
                             it.toJobResponse()
@@ -69,6 +92,44 @@ class JobUseCase(
                 )
             }
 
+    override fun getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(startLong: Long, endLong: Long, username: String, isCompleted: Boolean): Single<Int> =
+            jobRepository.findAllByPlannedDateBetweenAndJobAppliedToContainingAndIsCompleted(
+                    startLong = startLong,
+                    endLong = endLong,
+                    jobAppliedTo = username,
+                    isCompleted = isCompleted
+            ).toList().map {
+                        it.sumOf { it.timeSpent }
+            }
+
+    override fun getFirstCompletedJobDateLongForUser(username: String): Single<JobPlannedDateResponse> =
+            jobRepository.findTopByJobAppliedToOrderByPlannedDateAsc(username).map {
+                JobPlannedDateResponse(plannedDate = it.plannedDate!!)
+            }
+
+    override fun getAllTimeSpentForUserPerMonth(username: String): Single<JobTimeSpentResponseMap> =
+           jobRepository.findAllByJobAppliedToAndIsCompletedOrderByPlannedDateAsc(username, true).toList().map {
+               JobTimeSpentResponseMap(
+                        it.map {
+                            JobTimeSpentResponse(
+                                    name = longToMonthYearString(it.plannedDate!!),
+                                    timeSpent = it.timeSpent
+                            )
+                        }.groupingBy { it.name }
+                                .reduce { key, accumulator, element -> JobTimeSpentResponse(name = element.name, timeSpent = accumulator.timeSpent + element.timeSpent) }
+                )
+           }
+
+//    jobRepository.findAllByJobAppliedToAndIsCompletedOrderByPlannedDateAsc(username, true).map {
+//        JobPlannedDateResponse(
+//                plannedDate = it.plannedDate!!,
+//                timeSpent = it.timeSpent
+//        )
+//    }
+//    .toMultimap {
+//        Instant.ofEpochMilli(it.plannedDate!!).atZone(ZoneId.systemDefault()).toLocalDate().month.toString() +
+//                Instant.ofEpochMilli(it.plannedDate!!).atZone(ZoneId.systemDefault()).toLocalDate().year.toString()
+//    }
 
     override fun deleteJob(objectId: String): Single<JobResponse> =
             jobRepository.existsById(objectId).flatMap { status ->
@@ -77,6 +138,11 @@ class JobUseCase(
                     false -> Single.error(ResponseStatusException(HttpStatus.BAD_REQUEST))
                 }
             }
+
+    private fun longToMonthYearString(long: Long) =
+            Instant.ofEpochMilli(long).atZone(ZoneId.systemDefault()).toLocalDate().month.toString() +
+                Instant.ofEpochMilli(long).atZone(ZoneId.systemDefault()).toLocalDate().year.toString()
+
 
     private fun errorResponse() =
             JobResponse(
@@ -134,7 +200,17 @@ class JobUseCase(
                     createdBy = user
             )
 
-
+    private fun Job.toJobForListResponse()=
+            JobGetForListResponse(
+                    id = this.id,
+                    subject = this.subject,
+                    companyName = this.companyName,
+                    name = this.name,
+                    surname = this.surname,
+                    street = this.street,
+                    city = this.city,
+                    isCompleted = this.isCompleted
+            )
 
     private fun Job.toJobResponse()=
             JobGetAllResponse(

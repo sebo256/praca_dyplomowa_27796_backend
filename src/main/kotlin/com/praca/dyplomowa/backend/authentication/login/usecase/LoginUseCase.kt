@@ -22,7 +22,7 @@ class LoginUseCase(
         userRepository.findByUsername(request.username)
                 .flatMap { user ->
                     when(user.checkUserPassword(request)){
-                        true -> updateUser(user.copy(refreshToken = checkRefreshToken(user)))
+                        true -> updateUser(user.copy(refreshToken = generateRefreshToken(user)))
                         false -> Single.just(errorResponse())
                     }
                 }
@@ -48,7 +48,7 @@ class LoginUseCase(
     private fun updateUser(user: User) =
             userRepository.save(user).map{it.successResponse()}
 
-    private fun checkRefreshToken(user: User)=
+    private fun generateRefreshToken(user: User) =
             jwtService.refreshToken(user)
 
 //        return runCatching { jwtService.decodeRefreshToken(user.refreshToken).token }
