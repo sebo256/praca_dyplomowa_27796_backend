@@ -5,6 +5,6 @@ data class JobTimeSpentResponse (
     val timeSpent: Int
 )
 
-data class JobTimeSpentResponseMap (
-        val collection: Map<String, JobTimeSpentResponse>
+data class JobTimeSpentResponseCollection(
+        val collection: Collection<JobTimeSpentResponse>
 )

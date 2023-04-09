@@ -18,8 +18,6 @@ interface JobRepository: RxJava3CrudRepository<Job, String>, RxJava3SortingRepos
 
     fun countAllByJobAppliedToContainingAndIsCompleted(jobAppliedTo: String, isCompleted: Boolean): Single<Long>
 
-    fun findTopByJobAppliedToOrderByPlannedDateAsc(username: String): Single<Job>
-
     fun findAllByJobAppliedToAndIsCompletedOrderByPlannedDateAsc(username: String, isCompleted: Boolean): Flowable<Job>
 
 }

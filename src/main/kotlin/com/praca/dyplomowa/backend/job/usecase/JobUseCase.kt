@@ -102,14 +102,9 @@ class JobUseCase(
                         it.sumOf { it.timeSpent }
             }
 
-    override fun getFirstCompletedJobDateLongForUser(username: String): Single<JobPlannedDateResponse> =
-            jobRepository.findTopByJobAppliedToOrderByPlannedDateAsc(username).map {
-                JobPlannedDateResponse(plannedDate = it.plannedDate!!)
-            }
-
-    override fun getAllTimeSpentForUserPerMonth(username: String): Single<JobTimeSpentResponseMap> =
+    override fun getAllTimeSpentForUserPerMonth(username: String): Single<JobTimeSpentResponseCollection> =
            jobRepository.findAllByJobAppliedToAndIsCompletedOrderByPlannedDateAsc(username, true).toList().map {
-               JobTimeSpentResponseMap(
+               JobTimeSpentResponseCollection(
                         it.map {
                             JobTimeSpentResponse(
                                     name = longToMonthYearString(it.plannedDate!!),
@@ -117,6 +112,7 @@ class JobUseCase(
                             )
                         }.groupingBy { it.name }
                                 .reduce { key, accumulator, element -> JobTimeSpentResponse(name = element.name, timeSpent = accumulator.timeSpent + element.timeSpent) }
+                                .values
                 )
            }
 
@@ -140,7 +136,7 @@ class JobUseCase(
             }
 
     private fun longToMonthYearString(long: Long) =
-            Instant.ofEpochMilli(long).atZone(ZoneId.systemDefault()).toLocalDate().month.toString() +
+            Instant.ofEpochMilli(long).atZone(ZoneId.systemDefault()).toLocalDate().month.toString() + " " +
                 Instant.ofEpochMilli(long).atZone(ZoneId.systemDefault()).toLocalDate().year.toString()
 
 

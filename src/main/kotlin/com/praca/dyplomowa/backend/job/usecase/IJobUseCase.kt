@@ -1,9 +1,7 @@
 package com.praca.dyplomowa.backend.job.usecase
 
 import com.praca.dyplomowa.backend.job.models.*
-import com.praca.dyplomowa.backend.mongoDb.Job
 import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.flowables.GroupedFlowable
 
 interface IJobUseCase {
 
@@ -29,9 +27,7 @@ interface IJobUseCase {
 
     fun getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(startLong: Long, endLong: Long, username: String, isCompleted: Boolean): Single<Int>
 
-    fun getFirstCompletedJobDateLongForUser(username: String): Single<JobPlannedDateResponse>
-
-    fun getAllTimeSpentForUserPerMonth(username: String): Single<JobTimeSpentResponseMap>
+    fun getAllTimeSpentForUserPerMonth(username: String): Single<JobTimeSpentResponseCollection>
 
     fun updateJob(request: JobRequestUpdate): Single<JobResponse>
 

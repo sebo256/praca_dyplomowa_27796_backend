@@ -2,9 +2,7 @@ package com.praca.dyplomowa.backend.job
 
 import com.praca.dyplomowa.backend.job.models.*
 import com.praca.dyplomowa.backend.job.usecase.IJobUseCase
-import com.praca.dyplomowa.backend.mongoDb.Job
 import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.flowables.GroupedFlowable
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import reactor.adapter.rxjava.RxJava3Adapter.singleToMono
@@ -55,12 +53,8 @@ class JobController(private val jobUseCase: IJobUseCase) {
     fun getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(@RequestParam startLong: Long, @RequestParam endLong: Long, @RequestParam username: String, @RequestParam isCompleted: Boolean): Single<Int> =
             jobUseCase.getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(startLong, endLong, username, isCompleted)
 
-    @GetMapping("/getFirstCompletedJobDateLongForUser/")
-    fun getFirstCompletedJobDateLongForUser(@RequestParam username: String): Single<JobPlannedDateResponse> =
-            jobUseCase.getFirstCompletedJobDateLongForUser(username)
-
     @GetMapping("/getAllTimeSpentForUserPerMonth/")
-    fun getAllTimeSpentForUserPerMonth(@RequestParam username: String): Single<JobTimeSpentResponseMap> =
+    fun getAllTimeSpentForUserPerMonth(@RequestParam username: String): Single<JobTimeSpentResponseCollection> =
             jobUseCase.getAllTimeSpentForUserPerMonth(username)
 
     @PutMapping("/addJobApplyTo")
