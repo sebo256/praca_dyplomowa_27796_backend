@@ -9,14 +9,14 @@ import com.praca.dyplomowa.backend.mongoDb.User
 import com.praca.dyplomowa.backend.mongoDb.repository.UserRepository
 import com.praca.dyplomowa.backend.security.SecurityConfig
 import io.reactivex.rxjava3.core.Single
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class RegistrationUseCase(val logger: IApplicationLogger): IRegistrationUseCase {
+class RegistrationUseCase(
+        private val logger: IApplicationLogger,
+        private val userRepository: UserRepository
+        ): IRegistrationUseCase {
 
-    @Autowired
-    lateinit var userRepository: UserRepository
 
     override fun registerUser(request: RegistrationRequest): Single<RegistrationResponse> {
         val validationStatus = ValidationRegistrationData(request).validate()
@@ -67,4 +67,5 @@ class RegistrationUseCase(val logger: IApplicationLogger): IRegistrationUseCase 
                     surname = this.surname,
                     roles = listOf(ERoles.ROLE_USER.toString())
             )
+
 }

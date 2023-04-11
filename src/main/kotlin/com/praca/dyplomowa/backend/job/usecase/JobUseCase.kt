@@ -18,9 +18,6 @@ class JobUseCase(
         private val userRepository: UserRepository,
         private val jobRepository: JobRepository
 ):IJobUseCase {
-//
-//    @Autowired
-//    lateinit var jobRepository: JobRepository
 
     override fun createJob(request: JobRequest): Single<JobResponse> =
             userRepository.findByUsername(request.createdBy).flatMap { saveJob(request, it) }
@@ -115,17 +112,6 @@ class JobUseCase(
                                 .values
                 )
            }
-
-//    jobRepository.findAllByJobAppliedToAndIsCompletedOrderByPlannedDateAsc(username, true).map {
-//        JobPlannedDateResponse(
-//                plannedDate = it.plannedDate!!,
-//                timeSpent = it.timeSpent
-//        )
-//    }
-//    .toMultimap {
-//        Instant.ofEpochMilli(it.plannedDate!!).atZone(ZoneId.systemDefault()).toLocalDate().month.toString() +
-//                Instant.ofEpochMilli(it.plannedDate!!).atZone(ZoneId.systemDefault()).toLocalDate().year.toString()
-//    }
 
     override fun deleteJob(objectId: String): Single<JobResponse> =
             jobRepository.existsById(objectId).flatMap { status ->

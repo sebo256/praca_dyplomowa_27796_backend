@@ -22,7 +22,7 @@ class LoginUseCase(
         userRepository.findByUsername(request.username)
                 .flatMap { user ->
                     when(user.checkUserPassword(request)){
-                        true -> updateUser(user.copy(refreshToken = generateRefreshToken(user)))
+                        true -> Single.just(user.successResponse())
                         false -> Single.just(errorResponse())
                     }
                 }
@@ -51,20 +51,11 @@ class LoginUseCase(
     private fun generateRefreshToken(user: User) =
             jwtService.refreshToken(user)
 
-//        return runCatching { jwtService.decodeRefreshToken(user.refreshToken).token }
-//                .onFailure { jwtService.refreshToken(user) }
-//                .getOrThrow()
-//        return when(jwtService.refreshIsExpired(user.refreshToken)){
-//            true -> jwtService.refreshToken(user)
-//            false -> user.refreshToken!!
-//        }
-//        return null
-
 
     private fun User.successResponse() =
             AuthResponse(
                     jwt = jwtService.accessToken(this),
-                    refreshToken = this.refreshToken,
+                    refreshToken = generateRefreshToken(this),
                     message = "Successfully logged-in",
                     username = this.username,
                     roles = this.roles
