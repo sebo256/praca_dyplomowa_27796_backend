@@ -1,6 +1,5 @@
 package com.praca.dyplomowa.backend.authentication.refreshToken.usecase
 
-import com.auth0.jwt.exceptions.TokenExpiredException
 import com.praca.dyplomowa.backend.authentication.refreshToken.models.RefreshTokenResponse
 import com.praca.dyplomowa.backend.logger.IApplicationLogger
 import com.praca.dyplomowa.backend.mongoDb.repository.UserRepository

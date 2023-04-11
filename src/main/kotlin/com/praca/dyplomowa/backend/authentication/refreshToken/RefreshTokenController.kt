@@ -3,14 +3,9 @@ package com.praca.dyplomowa.backend.authentication.refreshToken
 import com.auth0.jwt.exceptions.TokenExpiredException
 import com.praca.dyplomowa.backend.authentication.refreshToken.models.RefreshTokenResponse
 import com.praca.dyplomowa.backend.authentication.refreshToken.usecase.IRefreshTokenUseCase
-import com.praca.dyplomowa.backend.authentication.refreshToken.usecase.RefreshTokenUseCase
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
-import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import reactor.adapter.rxjava.RxJava3Adapter.singleToMono
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono

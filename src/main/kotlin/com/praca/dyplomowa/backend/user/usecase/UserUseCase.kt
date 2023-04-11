@@ -1,6 +1,5 @@
 package com.praca.dyplomowa.backend.user.usecase
 
-import com.praca.dyplomowa.backend.job.models.JobGetAllResponseCollection
 import com.praca.dyplomowa.backend.mongoDb.User
 import com.praca.dyplomowa.backend.mongoDb.repository.UserRepository
 import com.praca.dyplomowa.backend.user.models.UserGetAllResponse

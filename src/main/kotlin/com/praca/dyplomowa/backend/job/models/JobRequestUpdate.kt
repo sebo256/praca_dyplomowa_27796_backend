@@ -1,7 +1,5 @@
 package com.praca.dyplomowa.backend.job.models
 
-import org.bson.types.ObjectId
-
 data class JobRequestUpdate(
         val objectId: String,
         val companyName: String?,
