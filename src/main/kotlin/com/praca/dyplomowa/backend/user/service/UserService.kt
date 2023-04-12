@@ -1,4 +1,4 @@
-package com.praca.dyplomowa.backend.user.usecase
+package com.praca.dyplomowa.backend.user.service
 
 import com.praca.dyplomowa.backend.mongoDb.User
 import com.praca.dyplomowa.backend.mongoDb.repository.UserRepository
@@ -8,9 +8,9 @@ import io.reactivex.rxjava3.core.Single
 import org.springframework.stereotype.Service
 
 @Service
-class UserUseCase(
+class UserService(
         private val userRepository: UserRepository
-): IUserUseCase {
+): IUserService {
     override fun getUsers(): Single<UserGetAllResponseCollection> =
         userRepository.findAll().toList().map {
             UserGetAllResponseCollection(

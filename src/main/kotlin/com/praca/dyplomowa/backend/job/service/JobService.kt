@@ -1,4 +1,4 @@
-package com.praca.dyplomowa.backend.job.usecase
+package com.praca.dyplomowa.backend.job.service
 
 import com.praca.dyplomowa.backend.job.models.*
 import com.praca.dyplomowa.backend.mongoDb.Job
@@ -14,10 +14,10 @@ import java.time.Instant
 import java.time.ZoneId
 
 @Service
-class JobUseCase(
+class JobService(
         private val userRepository: UserRepository,
         private val jobRepository: JobRepository
-):IJobUseCase {
+):IJobService {
 
     override fun createJob(request: JobRequest): Single<JobResponse> =
             userRepository.findByUsername(request.createdBy).flatMap { saveJob(request, it) }
@@ -186,6 +186,7 @@ class JobUseCase(
             JobGetForListResponse(
                     id = this.id,
                     subject = this.subject,
+                    jobType = this.jobType,
                     companyName = this.companyName,
                     name = this.name,
                     surname = this.surname,

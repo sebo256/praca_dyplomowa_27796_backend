@@ -3,7 +3,7 @@ package com.praca.dyplomowa.backend.authentication.login
 import com.praca.dyplomowa.backend.authentication.login.models.AuthResponse
 import com.praca.dyplomowa.backend.authentication.login.models.LoginRequest
 import com.praca.dyplomowa.backend.authentication.login.models.LoginResponse
-import com.praca.dyplomowa.backend.authentication.login.usecase.LoginUseCase
+import com.praca.dyplomowa.backend.authentication.login.service.LoginService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/auth")
-class LoginController(val loginUseCase: LoginUseCase) {
+class LoginController(val loginService: LoginService) {
 
     @Value("\${jwt.refreshExpirationInMs}")
     private val expirationCookieTime: Long = 604800000
@@ -26,7 +26,7 @@ class LoginController(val loginUseCase: LoginUseCase) {
     @PostMapping("/login")
     fun login(@RequestBody loginRequest: LoginRequest): Mono<ResponseEntity<LoginResponse>> =
             singleToMono(
-            loginUseCase.getUser(loginRequest)
+            loginService.getUser(loginRequest)
                     .map {
                         when(it.jwt.isNullOrBlank()) {
                             true -> {

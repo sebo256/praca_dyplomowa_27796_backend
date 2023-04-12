@@ -1,4 +1,4 @@
-package com.praca.dyplomowa.backend.authentication.registration.usecase
+package com.praca.dyplomowa.backend.authentication.registration.service
 
 import com.praca.dyplomowa.backend.authentication.registration.models.RegistrationRequest
 

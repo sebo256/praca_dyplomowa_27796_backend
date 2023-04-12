@@ -1,4 +1,4 @@
-package com.praca.dyplomowa.backend.authentication.registration.usecase
+package com.praca.dyplomowa.backend.authentication.registration.service
 
 import com.praca.dyplomowa.backend.authentication.registration.models.RegistrationRequest
 import com.praca.dyplomowa.backend.authentication.registration.models.RegistrationResponse
@@ -12,10 +12,10 @@ import io.reactivex.rxjava3.core.Single
 import org.springframework.stereotype.Service
 
 @Service
-class RegistrationUseCase(
+class RegistrationService(
         private val logger: IApplicationLogger,
         private val userRepository: UserRepository
-        ): IRegistrationUseCase {
+        ): IRegistrationService {
 
 
     override fun registerUser(request: RegistrationRequest): Single<RegistrationResponse> {

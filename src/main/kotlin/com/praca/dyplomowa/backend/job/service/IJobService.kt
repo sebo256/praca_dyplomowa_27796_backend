@@ -1,9 +1,9 @@
-package com.praca.dyplomowa.backend.job.usecase
+package com.praca.dyplomowa.backend.job.service
 
 import com.praca.dyplomowa.backend.job.models.*
 import io.reactivex.rxjava3.core.Single
 
-interface IJobUseCase {
+interface IJobService {
 
     fun createJob(request: JobRequest): Single<JobResponse>
 

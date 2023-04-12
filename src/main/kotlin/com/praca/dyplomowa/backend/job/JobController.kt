@@ -1,7 +1,7 @@
 package com.praca.dyplomowa.backend.job
 
 import com.praca.dyplomowa.backend.job.models.*
-import com.praca.dyplomowa.backend.job.usecase.IJobUseCase
+import com.praca.dyplomowa.backend.job.service.IJobService
 import io.reactivex.rxjava3.core.Single
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -10,64 +10,64 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/job")
-class JobController(private val jobUseCase: IJobUseCase) {
+class JobController(private val jobService: IJobService) {
 
 
     @PostMapping
     fun add(@RequestBody jobRequest: JobRequest): Single<JobResponse> =
-            jobUseCase.createJob(jobRequest)
+            jobService.createJob(jobRequest)
 
     @GetMapping
     fun getJobs(): Single<JobGetAllResponseCollection> =
-            jobUseCase.getJobs()
+            jobService.getJobs()
 
     @GetMapping("/getJobsForList")
     fun getJobsForList(): Single<JobGetForListResponseCollection> =
-            jobUseCase.getJobsForList()
+            jobService.getJobsForList()
 
     @GetMapping("/getDatesAndInfo")
     fun getJobDatesAndInfo(): Single<JobGetDatesAndInfoResponseCollection> =
-            jobUseCase.getDatesAndInfo()
+            jobService.getDatesAndInfo()
 
     @GetMapping("/getById/{objectId}")
     fun getJobById(@PathVariable objectId: String): Single<JobGetAllResponse> =
-            jobUseCase.getJobById(objectId)
+            jobService.getJobById(objectId)
 
     @GetMapping("/getById/jobAppliedTo/{objectId}")
     fun getJobAppliedTo(@PathVariable objectId: String): Single<JobAppliedToResponse> =
-            jobUseCase.getJobAppliedTo(objectId)
+            jobService.getJobAppliedTo(objectId)
 
     @GetMapping("/getByUsername/getJobsAppliedToUserAndCheckCompletion/")
     fun getJobsAppliedToUserAndCheckCompleted(@RequestParam username: String,@RequestParam isCompleted: Boolean): Single<JobGetForListResponseCollection> =
-            jobUseCase.getJobsAppliedToUserAndCheckCompleted(username, isCompleted)
+            jobService.getJobsAppliedToUserAndCheckCompleted(username, isCompleted)
 
     @GetMapping("/getByUsername/countJobsAppliedToUserAndCheckCompletion/")
     fun countJobsAppliedToUserAndCheckCompleted(@RequestParam username: String,@RequestParam isCompleted: Boolean): Single<Long> =
-            jobUseCase.countJobsAppliedToUserAndCheckCompleted(username, isCompleted)
+            jobService.countJobsAppliedToUserAndCheckCompleted(username, isCompleted)
 
     @GetMapping("/getByLongDateBetween/")
     fun getJobByLongDateBetween(@RequestParam startLong: Long, @RequestParam endLong: Long): Single<JobGetAllResponseCollection> =
-            jobUseCase.getJobByLongDateBetween(startLong, endLong)
+            jobService.getJobByLongDateBetween(startLong, endLong)
 
     @GetMapping("/getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompletion/")
     fun getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(@RequestParam startLong: Long, @RequestParam endLong: Long, @RequestParam username: String, @RequestParam isCompleted: Boolean): Single<Int> =
-            jobUseCase.getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(startLong, endLong, username, isCompleted)
+            jobService.getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(startLong, endLong, username, isCompleted)
 
     @GetMapping("/getAllTimeSpentForUserPerMonth/")
     fun getAllTimeSpentForUserPerMonth(@RequestParam username: String): Single<JobTimeSpentResponseCollection> =
-            jobUseCase.getAllTimeSpentForUserPerMonth(username)
+            jobService.getAllTimeSpentForUserPerMonth(username)
 
     @PutMapping("/addJobApplyTo")
     fun addJobApplyTo(@RequestBody jobApplyToRequest: JobApplyToRequest): Single<JobResponse> =
-            jobUseCase.addJobApplyTo(jobApplyToRequest)
+            jobService.addJobApplyTo(jobApplyToRequest)
 
     @PutMapping
     fun updateJob(@RequestBody jobRequestUpdate: JobRequestUpdate): Single<JobResponse> =
-            jobUseCase.updateJob(jobRequestUpdate)
+            jobService.updateJob(jobRequestUpdate)
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("{objectId}")
     fun deleteJob(@PathVariable objectId: String): Mono<JobResponse> =
-            singleToMono(jobUseCase.deleteJob(objectId))
+            singleToMono(jobService.deleteJob(objectId))
 
 }

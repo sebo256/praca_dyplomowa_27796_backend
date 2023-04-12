@@ -8,6 +8,7 @@ data class JobGetForListResponse(
         @JsonSerialize(using = ToStringSerializer::class)
         val id: ObjectId = ObjectId.get(),
         val subject: String,
+        val jobType: String,
         val companyName: String?,
         val name: String,
         val surname: String,

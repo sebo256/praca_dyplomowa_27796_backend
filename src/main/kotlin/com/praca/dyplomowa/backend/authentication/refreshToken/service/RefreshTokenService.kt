@@ -1,4 +1,4 @@
-package com.praca.dyplomowa.backend.authentication.refreshToken.usecase
+package com.praca.dyplomowa.backend.authentication.refreshToken.service
 
 import com.praca.dyplomowa.backend.authentication.refreshToken.models.RefreshTokenResponse
 import com.praca.dyplomowa.backend.logger.IApplicationLogger
@@ -8,9 +8,9 @@ import io.reactivex.rxjava3.core.Single
 import org.springframework.stereotype.Service
 
 @Service
-class RefreshTokenUseCase(private val jwtService: IJWTService,
+class RefreshTokenService(private val jwtService: IJWTService,
                           private val userRepository: UserRepository,
-                          private val logger: IApplicationLogger): IRefreshTokenUseCase {
+                          private val logger: IApplicationLogger): IRefreshTokenService {
 
     override fun getAccessToken(token: String): Single<RefreshTokenResponse> =
             userRepository.findByUsername(decodeToken(token))

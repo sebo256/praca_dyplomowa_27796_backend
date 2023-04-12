@@ -1,4 +1,4 @@
-package com.praca.dyplomowa.backend.authentication.login.usecase
+package com.praca.dyplomowa.backend.authentication.login.service
 
 import com.auth0.jwt.exceptions.TokenExpiredException
 import com.praca.dyplomowa.backend.authentication.login.models.AuthResponse
@@ -12,11 +12,11 @@ import io.reactivex.rxjava3.core.Single
 import org.springframework.stereotype.Service
 
 @Service
-class LoginUseCase(
+class LoginService(
         private val logger: IApplicationLogger,
         private val userRepository: UserRepository,
         private val jwtService: IJWTService
-): ILoginUseCase {
+): ILoginService {
 
     override fun getUser(request: LoginRequest): Single<AuthResponse> =
         userRepository.findByUsername(request.username)
