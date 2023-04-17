@@ -99,6 +99,21 @@ class JobService(
                         it.sumOf { it.timeSpent }
             }
 
+    override fun getJobsForSpecifiedMonthAndUserAndCheckCompleted(startLong: Long, endLong: Long, username: String): Single<JobGetForListResponseCollection> =
+            jobRepository.findAllByPlannedDateBetweenAndJobAppliedToContainingAndIsCompleted(
+                    startLong = startLong,
+                    endLong = endLong,
+                    jobAppliedTo = username,
+                    isCompleted = true
+            ).toList().map {
+                JobGetForListResponseCollection(
+                        it.map {
+                            it.toJobForListResponse()
+                        }
+                )
+            }
+
+
     override fun getAllTimeSpentForUserPerMonth(username: String): Single<JobTimeSpentResponseCollection> =
            jobRepository.findAllByJobAppliedToAndIsCompletedOrderByPlannedDateAsc(username, true).toList().map {
                JobTimeSpentResponseCollection(

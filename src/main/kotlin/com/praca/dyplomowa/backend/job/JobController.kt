@@ -53,6 +53,10 @@ class JobController(private val jobService: IJobService) {
     fun getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(@RequestParam startLong: Long, @RequestParam endLong: Long, @RequestParam username: String, @RequestParam isCompleted: Boolean): Single<Int> =
             jobService.getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(startLong, endLong, username, isCompleted)
 
+    @GetMapping("/getJobsForSpecifiedMonthAndUserAndCheckCompleted/")
+    fun getJobsForSpecifiedMonthAndUserAndCheckCompleted(@RequestParam startLong: Long, @RequestParam endLong: Long, @RequestParam username: String): Single<JobGetForListResponseCollection> =
+            jobService.getJobsForSpecifiedMonthAndUserAndCheckCompleted(startLong, endLong, username)
+
     @GetMapping("/getAllTimeSpentForUserPerMonth/")
     fun getAllTimeSpentForUserPerMonth(@RequestParam username: String): Single<JobTimeSpentResponseCollection> =
             jobService.getAllTimeSpentForUserPerMonth(username)
@@ -69,5 +73,4 @@ class JobController(private val jobService: IJobService) {
     @DeleteMapping("{objectId}")
     fun deleteJob(@PathVariable objectId: String): Mono<JobResponse> =
             singleToMono(jobService.deleteJob(objectId))
-
 }

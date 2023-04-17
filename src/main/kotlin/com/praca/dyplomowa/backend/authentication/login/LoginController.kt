@@ -39,7 +39,7 @@ class LoginController(val loginService: LoginService) {
                                         .maxAge(expirationCookieTime)
                                         .httpOnly(true)
                                         .path("/")
-//TODO production?                                        .secure(true)
+                                        .secure(true)
                                         .build()
                                 ResponseEntity
                                         .ok()
@@ -55,7 +55,7 @@ class LoginController(val loginService: LoginService) {
                     jwt = this.jwt,
                     message = this.message,
                     username = this.username,
-                    roles = this.roles!!
+                    roles = this.roles
             )
 
 }

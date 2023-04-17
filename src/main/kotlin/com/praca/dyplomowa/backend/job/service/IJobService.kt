@@ -27,6 +27,8 @@ interface IJobService {
 
     fun getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(startLong: Long, endLong: Long, username: String, isCompleted: Boolean): Single<Int>
 
+    fun getJobsForSpecifiedMonthAndUserAndCheckCompleted(startLong: Long, endLong: Long, username: String): Single<JobGetForListResponseCollection>
+
     fun getAllTimeSpentForUserPerMonth(username: String): Single<JobTimeSpentResponseCollection>
 
     fun updateJob(request: JobRequestUpdate): Single<JobResponse>
