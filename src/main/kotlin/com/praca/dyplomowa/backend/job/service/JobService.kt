@@ -30,7 +30,8 @@ class JobService(
                     .onErrorReturn { errorResponse() }
 
     private fun saveJob(request: JobRequest, user: User, jobType: JobType) =
-            jobRepository.save(request.toJob(user, jobType)).map { it.toNewJobResponse() }
+//            jobRepository.save(request.toJob(user, jobType)).map { it.toNewJobResponse() }
+            saveJob(request.toJob(user, jobType))
 
     override fun addJobApplyTo(request: JobApplyToRequest): Single<JobResponse> =
             jobRepository.findById(request.objectId).toSingle().flatMap { saveJob(it.copy(jobAppliedTo = request.jobAppliedTo)) }

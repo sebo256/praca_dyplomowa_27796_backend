@@ -1,5 +1,7 @@
 package com.praca.dyplomowa.backend.mongoDb
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
@@ -8,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.DocumentReference
 @Document(collection = "job")
 data class Job(
         @Id
+        @JsonSerialize(using = ToStringSerializer::class)
         val id: ObjectId = ObjectId.get(),
         val companyName: String?,
         val name: String,
@@ -27,6 +30,5 @@ data class Job(
         val isCompleted: Boolean,
         @DocumentReference
         val createdBy: User,
-//        @DocumentReference
         val jobAppliedTo: Collection<String>? = null
 )

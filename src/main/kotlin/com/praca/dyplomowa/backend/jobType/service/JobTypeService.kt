@@ -17,8 +17,11 @@ class JobTypeService(
 ):IJobTypeService {
 
     override fun addJobType(jobTypeRequest: JobTypeRequest): Single<JobTypeResponse> =
-            jobTypeRepository.save(jobTypeRequest.toJobType()).map { it.toNewJobTypeResponse() }
+            saveJobType(jobTypeRequest.toJobType())
                 .onErrorReturn { errorResponse() }
+
+    private fun saveJobType(jobType: JobType) =
+            jobTypeRepository.save(jobType).map { it.toNewJobTypeResponse() }
 
     override fun getJobTypes(): Single<JobTypeGetAllResponseCollection> =
             jobTypeRepository.findAll(Sort.by(Sort.Direction.ASC, "jobType")).toList().map {
