@@ -2,8 +2,10 @@ package com.praca.dyplomowa.backend.job.service
 
 import com.praca.dyplomowa.backend.job.models.*
 import com.praca.dyplomowa.backend.mongoDb.Job
+import com.praca.dyplomowa.backend.mongoDb.JobType
 import com.praca.dyplomowa.backend.mongoDb.User
 import com.praca.dyplomowa.backend.mongoDb.repository.JobRepository
+import com.praca.dyplomowa.backend.mongoDb.repository.JobTypeRepository
 import com.praca.dyplomowa.backend.mongoDb.repository.UserRepository
 import io.reactivex.rxjava3.core.Single
 import org.springframework.data.domain.Sort
@@ -16,15 +18,19 @@ import java.time.ZoneId
 @Service
 class JobService(
         private val userRepository: UserRepository,
-        private val jobRepository: JobRepository
+        private val jobRepository: JobRepository,
+        private val jobTypeRepository: JobTypeRepository
 ):IJobService {
 
     override fun createJob(request: JobRequest): Single<JobResponse> =
-            userRepository.findByUsername(request.createdBy).flatMap { saveJob(request, it) }
+            userRepository.findByUsername(request.createdBy)
+                    .flatMap { user -> jobTypeRepository.findById(request.jobType)
+                            .toSingle()
+                    .flatMap { saveJob(request, user, it) }}
                     .onErrorReturn { errorResponse() }
 
-    private fun saveJob(request: JobRequest, user: User) =
-            jobRepository.save(request.toJob(user)).map { it.toNewJobResponse() }
+    private fun saveJob(request: JobRequest, user: User, jobType: JobType) =
+            jobRepository.save(request.toJob(user, jobType)).map { it.toNewJobResponse() }
 
     override fun addJobApplyTo(request: JobApplyToRequest): Single<JobResponse> =
             jobRepository.findById(request.objectId).toSingle().flatMap { saveJob(it.copy(jobAppliedTo = request.jobAppliedTo)) }
@@ -177,7 +183,7 @@ class JobService(
                     isCompleted = this.isCompleted
             )
 
-    private fun JobRequest.toJob(user: User) =
+    private fun JobRequest.toJob(user: User, jobType: JobType) =
             Job(
                     companyName = this.companyName,
                     name = this.name,
@@ -188,7 +194,7 @@ class JobService(
                     phoneNumber = this.phoneNumber,
                     email = this.email,
                     subject = this.subject,
-                    jobType = this.jobType,
+                    jobType = jobType,
                     dateOfCreation = this.dateOfCreation,
                     plannedDate = this.plannedDate,
                     timeSpent = this.timeSpent,
@@ -201,7 +207,7 @@ class JobService(
             JobGetForListResponse(
                     id = this.id,
                     subject = this.subject,
-                    jobType = this.jobType,
+                    jobType = this.jobType.jobType,
                     companyName = this.companyName,
                     name = this.name,
                     surname = this.surname,
@@ -237,7 +243,8 @@ class JobService(
             )
 
     override fun updateJob(request: JobRequestUpdate): Single<JobResponse> =
-            jobRepository.findById(request.objectId).toSingle().flatMap { saveJob(it.copy(
+            jobRepository.findById(request.objectId).toSingle().flatMap { job -> jobTypeRepository.findById(request.jobType).toSingle()
+                    .flatMap { saveJob(job.copy(
                     companyName = request.companyName,
                     name = request.name,
                     surname = request.surname,
@@ -247,13 +254,13 @@ class JobService(
                     phoneNumber = request.phoneNumber,
                     email = request.email,
                     subject =  request.subject,
-                    jobType = request.jobType,
+                    jobType = it,
                     plannedDate = request.plannedDate,
                     timeSpent = request.timeSpent,
                     note = request.note,
                     isCompleted = request.isCompleted,
 
-            )) }
+            )) }}
 
 
 

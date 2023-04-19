@@ -18,7 +18,8 @@ data class Job(
         val phoneNumber: String?,
         val email: String?,
         val subject: String,
-        val jobType: String,
+        @DocumentReference
+        val jobType: JobType,
         val dateOfCreation: Long,
         val plannedDate: Long?,
         val timeSpent: Int,
