@@ -1,9 +1,11 @@
 package com.praca.dyplomowa.backend.job.service
 
 import com.praca.dyplomowa.backend.job.models.*
+import com.praca.dyplomowa.backend.mongoDb.Client
 import com.praca.dyplomowa.backend.mongoDb.Job
 import com.praca.dyplomowa.backend.mongoDb.JobType
 import com.praca.dyplomowa.backend.mongoDb.User
+import com.praca.dyplomowa.backend.mongoDb.repository.ClientRepository
 import com.praca.dyplomowa.backend.mongoDb.repository.JobRepository
 import com.praca.dyplomowa.backend.mongoDb.repository.JobTypeRepository
 import com.praca.dyplomowa.backend.mongoDb.repository.UserRepository
@@ -19,19 +21,31 @@ import java.time.ZoneId
 class JobService(
         private val userRepository: UserRepository,
         private val jobRepository: JobRepository,
-        private val jobTypeRepository: JobTypeRepository
+        private val jobTypeRepository: JobTypeRepository,
+        private val clientRepository: ClientRepository
 ):IJobService {
 
     override fun createJob(request: JobRequest): Single<JobResponse> =
-            userRepository.findByUsername(request.createdBy)
-                    .flatMap { user -> jobTypeRepository.findById(request.jobType)
-                            .toSingle()
-                    .flatMap { saveJob(request, user, it) }}
-                    .onErrorReturn { errorResponse() }
+            getUserAndJobTypeAndClientForNewJob(request).flatMap {
+                saveJob(
+                    request = request,
+                    user = it.first,
+                    jobType = it.second,
+                    client = it.third
+                )
+            }
 
-    private fun saveJob(request: JobRequest, user: User, jobType: JobType) =
-//            jobRepository.save(request.toJob(user, jobType)).map { it.toNewJobResponse() }
-            saveJob(request.toJob(user, jobType))
+    private fun getUserAndJobTypeAndClientForNewJob(request: JobRequest) =
+            Single.zip(
+                    userRepository.findByUsername(request.createdBy),
+                    jobTypeRepository.findById(request.jobType).toSingle(),
+                    clientRepository.findById(request.client).toSingle()
+            ) { user, jobType, client ->
+                Triple(user, jobType, client)
+            }
+
+    private fun saveJob(request: JobRequest, user: User, jobType: JobType, client: Client) =
+            saveJob(request.toJob(user, jobType, client))
 
     override fun addJobApplyTo(request: JobApplyToRequest): Single<JobResponse> =
             jobRepository.findById(request.objectId).toSingle().flatMap { saveJob(it.copy(jobAppliedTo = request.jobAppliedTo)) }
@@ -143,6 +157,30 @@ class JobService(
                 }
             }
 
+    override fun updateJob(request: JobRequestUpdate): Single<JobResponse> =
+            getJobAndJobTypeAndClientForJobUpdate(request).flatMap {
+                saveJob(
+                        it.first.copy(
+                                client = it.third,
+                                subject =  request.subject,
+                                jobType = it.second,
+                                plannedDate = request.plannedDate,
+                                timeSpent = request.timeSpent,
+                                note = request.note,
+                                isCompleted = request.isCompleted,
+                        )
+                )
+            }
+
+    private fun getJobAndJobTypeAndClientForJobUpdate(request: JobRequestUpdate) =
+            Single.zip(
+                    jobRepository.findById(request.objectId).toSingle(),
+                    jobTypeRepository.findById(request.jobType).toSingle(),
+                    clientRepository.findById(request.client).toSingle()
+            ) { job, jobType, client ->
+                Triple(job, jobType, client)
+            }
+
     private fun longToMonthYearString(long: Long) =
             Instant.ofEpochMilli(long).atZone(ZoneId.systemDefault()).toLocalDate().month.toString() + " " +
                 Instant.ofEpochMilli(long).atZone(ZoneId.systemDefault()).toLocalDate().year.toString()
@@ -184,16 +222,9 @@ class JobService(
                     isCompleted = this.isCompleted
             )
 
-    private fun JobRequest.toJob(user: User, jobType: JobType) =
+    private fun JobRequest.toJob(user: User, jobType: JobType, client: Client) =
             Job(
-                    companyName = this.companyName,
-                    name = this.name,
-                    surname = this.surname,
-                    street = this.street,
-                    postalCode = this.postalCode,
-                    city = this.city,
-                    phoneNumber = this.phoneNumber,
-                    email = this.email,
+                    client = client,
                     subject = this.subject,
                     jobType = jobType,
                     dateOfCreation = this.dateOfCreation,
@@ -209,25 +240,18 @@ class JobService(
                     id = this.id,
                     subject = this.subject,
                     jobType = this.jobType.jobType,
-                    companyName = this.companyName,
-                    name = this.name,
-                    surname = this.surname,
-                    street = this.street,
-                    city = this.city,
+                    companyName = this.client.companyName,
+                    name = this.client.name,
+                    surname = this.client.surname,
+                    street = this.client.street,
+                    city = this.client.city,
                     isCompleted = this.isCompleted
             )
 
     private fun Job.toJobResponse()=
             JobGetAllResponse(
                     id = this.id,
-                    companyName = this.companyName,
-                    name = this.name,
-                    surname = this.surname,
-                    street = this.street,
-                    postalCode = this.postalCode,
-                    city = this.city,
-                    phoneNumber = this.phoneNumber,
-                    email = this.email,
+                    client = this.client,
                     subject = this.subject,
                     jobType = this.jobType,
                     dateOfCreation = this.dateOfCreation,
@@ -242,27 +266,4 @@ class JobService(
                     ),
                     jobAppliedTo = this.jobAppliedTo?: listOf()
             )
-
-    override fun updateJob(request: JobRequestUpdate): Single<JobResponse> =
-            jobRepository.findById(request.objectId).toSingle().flatMap { job -> jobTypeRepository.findById(request.jobType).toSingle()
-                    .flatMap { saveJob(job.copy(
-                    companyName = request.companyName,
-                    name = request.name,
-                    surname = request.surname,
-                    street = request.street,
-                    postalCode = request.postalCode,
-                    city = request.city,
-                    phoneNumber = request.phoneNumber,
-                    email = request.email,
-                    subject =  request.subject,
-                    jobType = it,
-                    plannedDate = request.plannedDate,
-                    timeSpent = request.timeSpent,
-                    note = request.note,
-                    isCompleted = request.isCompleted,
-
-            )) }}
-
-
-
 }

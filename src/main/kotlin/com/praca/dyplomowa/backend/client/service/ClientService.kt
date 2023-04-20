@@ -1,9 +1,6 @@
 package com.praca.dyplomowa.backend.client.service
 
-import com.praca.dyplomowa.backend.client.models.ClientGetAllResponse
-import com.praca.dyplomowa.backend.client.models.ClientGetAllResponseCollection
-import com.praca.dyplomowa.backend.client.models.ClientRequest
-import com.praca.dyplomowa.backend.client.models.ClientResponse
+import com.praca.dyplomowa.backend.client.models.*
 import com.praca.dyplomowa.backend.mongoDb.Client
 import com.praca.dyplomowa.backend.mongoDb.repository.ClientRepository
 import io.reactivex.rxjava3.core.Single
@@ -30,6 +27,25 @@ class ClientService(
                         }
                 )
             }
+
+    override fun getClientById(objectId: String): Single<ClientGetAllResponse> =
+            clientRepository.findById(objectId).toSingle().map { it.toGetAllResponse() }
+
+    override fun updateClient(clientRequestUpdate: ClientRequestUpdate): Single<ClientResponse> =
+            clientRepository.findById(clientRequestUpdate.objectId).toSingle().flatMap {
+                saveClient(it.copy(
+                companyName = clientRequestUpdate.companyName,
+                name = clientRequestUpdate.name,
+                surname = clientRequestUpdate.surname,
+                street = clientRequestUpdate.street,
+                postalCode = clientRequestUpdate.postalCode,
+                city = clientRequestUpdate.city,
+                phoneNumber = clientRequestUpdate.phoneNumber,
+                email = clientRequestUpdate.email
+                ))
+            }.onErrorReturn { errorResponse() }
+
+
 
     private fun errorResponse() =
             ClientResponse(
