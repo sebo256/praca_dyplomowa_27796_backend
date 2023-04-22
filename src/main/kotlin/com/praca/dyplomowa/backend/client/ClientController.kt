@@ -3,13 +3,15 @@ package com.praca.dyplomowa.backend.client
 import com.praca.dyplomowa.backend.client.models.*
 import com.praca.dyplomowa.backend.client.service.IClientService
 import io.reactivex.rxjava3.core.Single
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
+import reactor.adapter.rxjava.RxJava3Adapter
+import reactor.adapter.rxjava.RxJava3Adapter.singleToMono
+import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
+import java.util.NoSuchElementException
 
 @RestController
 @RequestMapping("/client")
@@ -31,4 +33,12 @@ class ClientController(private val clientService: IClientService) {
     fun updateClient(@RequestBody clientRequestUpdate: ClientRequestUpdate): Single<ClientResponse> =
             clientService.updateClient(clientRequestUpdate)
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("{objectId}")
+    fun deleteClient(@PathVariable objectId: String): Mono<ClientResponse> =
+            singleToMono(clientService.deleteClient(objectId))
+
+    @ExceptionHandler(NoSuchElementException::class)
+    fun noSuchElementExceptionClient(): Mono<ClientResponse> =
+            ResponseStatusException(HttpStatus.NOT_FOUND).toMono()
 }

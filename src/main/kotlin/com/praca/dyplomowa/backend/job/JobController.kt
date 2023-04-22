@@ -3,10 +3,14 @@ package com.praca.dyplomowa.backend.job
 import com.praca.dyplomowa.backend.job.models.*
 import com.praca.dyplomowa.backend.job.service.IJobService
 import io.reactivex.rxjava3.core.Single
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 import reactor.adapter.rxjava.RxJava3Adapter.singleToMono
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
+import java.util.NoSuchElementException
 
 @RestController
 @RequestMapping("/job")
@@ -73,4 +77,8 @@ class JobController(private val jobService: IJobService) {
     @DeleteMapping("{objectId}")
     fun deleteJob(@PathVariable objectId: String): Mono<JobResponse> =
             singleToMono(jobService.deleteJob(objectId))
+
+    @ExceptionHandler(NoSuchElementException::class)
+    fun noSuchElementExceptionJob(): Mono<JobResponse> =
+            ResponseStatusException(HttpStatus.NOT_FOUND).toMono()
 }

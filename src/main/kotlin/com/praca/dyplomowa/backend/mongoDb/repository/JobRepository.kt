@@ -1,5 +1,6 @@
 package com.praca.dyplomowa.backend.mongoDb.repository
 
+import com.praca.dyplomowa.backend.mongoDb.Client
 import com.praca.dyplomowa.backend.mongoDb.Job
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Single
@@ -18,4 +19,5 @@ interface JobRepository: RxJava3CrudRepository<Job, String>, RxJava3SortingRepos
 
     fun findAllByJobAppliedToAndIsCompletedOrderByPlannedDateAsc(username: String, isCompleted: Boolean): Flowable<Job>
 
+    fun countAllByClient(client: Client): Single<Long>
 }

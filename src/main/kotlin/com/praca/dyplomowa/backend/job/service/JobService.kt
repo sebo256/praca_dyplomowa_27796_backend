@@ -150,12 +150,7 @@ class JobService(
            }
 
     override fun deleteJob(objectId: String): Single<JobResponse> =
-            jobRepository.existsById(objectId).flatMap { status ->
-                when(status){
-                    true -> jobRepository.deleteById(objectId).toSingleDefault(deleteResponse())
-                    false -> Single.error(ResponseStatusException(HttpStatus.BAD_REQUEST))
-                }
-            }
+            jobRepository.deleteById(objectId).toSingleDefault(deleteResponse())
 
     override fun updateJob(request: JobRequestUpdate): Single<JobResponse> =
             getJobAndJobTypeAndClientForJobUpdate(request).flatMap {
@@ -259,7 +254,7 @@ class JobService(
                     timeSpent = this.timeSpent,
                     note = this.note,
                     isCompleted = this.isCompleted,
-                    createdBy = UserResponse(
+                    createdBy = JobUserResponse(
                             username = this.createdBy.username,
                             name = this.createdBy.name,
                             surname = this.createdBy.surname

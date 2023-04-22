@@ -13,4 +13,6 @@ interface IClientService {
 
     fun updateClient(clientRequestUpdate: ClientRequestUpdate): Single<ClientResponse>
 
+    fun deleteClient(objectId: String): Single<ClientResponse>
+
 }

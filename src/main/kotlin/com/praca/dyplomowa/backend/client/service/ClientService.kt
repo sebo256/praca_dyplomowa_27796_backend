@@ -3,13 +3,17 @@ package com.praca.dyplomowa.backend.client.service
 import com.praca.dyplomowa.backend.client.models.*
 import com.praca.dyplomowa.backend.mongoDb.Client
 import com.praca.dyplomowa.backend.mongoDb.repository.ClientRepository
+import com.praca.dyplomowa.backend.mongoDb.repository.JobRepository
 import io.reactivex.rxjava3.core.Single
 import org.springframework.data.domain.Sort
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 
 @Service
 class ClientService(
-        private val clientRepository: ClientRepository
+        private val clientRepository: ClientRepository,
+        private val jobRepository: JobRepository
 ): IClientService {
 
     override fun addClient(clientRequest: ClientRequest): Single<ClientResponse> =
@@ -45,12 +49,26 @@ class ClientService(
                 ))
             }.onErrorReturn { errorResponse() }
 
-
+    override fun deleteClient(objectId: String): Single<ClientResponse> =
+            clientRepository.findById(objectId).toSingle().flatMap {
+                        jobRepository.countAllByClient(it).flatMap {
+                            when(it < 1){
+                                true -> clientRepository.deleteById(objectId).toSingleDefault(deleteResponse())
+                                false -> Single.fromCallable{ errorResponse() }
+                            }
+                        }
+                    }
 
     private fun errorResponse() =
             ClientResponse(
                     status = false,
                     message = "Something went wrong in creating new job type"
+            )
+
+    private fun deleteResponse() =
+            ClientResponse(
+                    status = true,
+                    message = "Successfully deleted client"
             )
 
     private fun Client.toNewClientResponse() =

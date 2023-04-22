@@ -17,11 +17,11 @@ data class JobGetAllResponse(
         val timeSpent: Int,
         val note: String?,
         val isCompleted: Boolean,
-        val createdBy: UserResponse,
+        val createdBy: JobUserResponse,
         val jobAppliedTo: Collection<String>
 )
 
-data class UserResponse(
+data class JobUserResponse(
         val username: String,
         val name: String,
         val surname: String
