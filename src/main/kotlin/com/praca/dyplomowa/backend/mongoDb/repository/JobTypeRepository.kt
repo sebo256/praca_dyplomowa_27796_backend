@@ -1,6 +1,5 @@
 package com.praca.dyplomowa.backend.mongoDb.repository
 
-import com.praca.dyplomowa.backend.mongoDb.Job
 import com.praca.dyplomowa.backend.mongoDb.JobType
 import org.springframework.data.repository.reactive.RxJava3CrudRepository
 import org.springframework.data.repository.reactive.RxJava3SortingRepository

@@ -7,11 +7,9 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
-import reactor.adapter.rxjava.RxJava3Adapter
 import reactor.adapter.rxjava.RxJava3Adapter.singleToMono
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
-import java.util.NoSuchElementException
 
 @RestController
 @RequestMapping("/client")

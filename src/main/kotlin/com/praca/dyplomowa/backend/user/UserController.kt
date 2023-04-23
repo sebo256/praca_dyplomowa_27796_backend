@@ -1,8 +1,8 @@
 package com.praca.dyplomowa.backend.user
 
-import com.praca.dyplomowa.backend.user.models.UserResponse
 import com.praca.dyplomowa.backend.user.models.UserGetAllResponse
 import com.praca.dyplomowa.backend.user.models.UserGetAllResponseCollection
+import com.praca.dyplomowa.backend.user.models.UserResponse
 import com.praca.dyplomowa.backend.user.service.IUserService
 import io.reactivex.rxjava3.core.Single
 import org.springframework.http.HttpStatus
@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
-import java.util.NoSuchElementException
 
 @RestController
 @RequestMapping("/user")

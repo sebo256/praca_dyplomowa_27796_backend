@@ -1,16 +1,17 @@
 package com.praca.dyplomowa.backend.job.service
 
 import com.praca.dyplomowa.backend.job.models.*
-import com.praca.dyplomowa.backend.mongoDb.*
+import com.praca.dyplomowa.backend.mongoDb.Client
+import com.praca.dyplomowa.backend.mongoDb.Job
+import com.praca.dyplomowa.backend.mongoDb.JobType
+import com.praca.dyplomowa.backend.mongoDb.User
 import com.praca.dyplomowa.backend.mongoDb.repository.ClientRepository
 import com.praca.dyplomowa.backend.mongoDb.repository.JobRepository
 import com.praca.dyplomowa.backend.mongoDb.repository.JobTypeRepository
 import com.praca.dyplomowa.backend.mongoDb.repository.UserRepository
 import io.reactivex.rxjava3.core.Single
 import org.springframework.data.domain.Sort
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
 import java.time.Instant
 import java.time.ZoneId
 

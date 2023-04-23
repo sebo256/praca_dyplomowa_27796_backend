@@ -10,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException
 import reactor.adapter.rxjava.RxJava3Adapter.singleToMono
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
-import java.util.NoSuchElementException
 
 @RestController
 @RequestMapping("/job")

@@ -6,9 +6,7 @@ import com.praca.dyplomowa.backend.mongoDb.repository.ClientRepository
 import com.praca.dyplomowa.backend.mongoDb.repository.JobRepository
 import io.reactivex.rxjava3.core.Single
 import org.springframework.data.domain.Sort
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
 
 @Service
 class ClientService(

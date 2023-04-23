@@ -1,7 +1,5 @@
 package com.praca.dyplomowa.backend.client.models
 
-import org.bson.types.ObjectId
-
 data class ClientRequestUpdate(
         val objectId: String,
         val companyName: String?,
