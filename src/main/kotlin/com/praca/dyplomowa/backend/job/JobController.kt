@@ -37,9 +37,10 @@ class JobController(private val jobService: IJobService) {
     fun getJobById(@PathVariable objectId: String): Single<JobGetAllResponse> =
             jobService.getJobById(objectId)
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/getById/jobAppliedTo/{objectId}")
-    fun getJobAppliedTo(@PathVariable objectId: String): Single<JobAppliedToResponse> =
-            jobService.getJobAppliedTo(objectId)
+    fun getJobAppliedTo(@PathVariable objectId: String): Mono<JobAppliedToResponse> =
+            singleToMono(jobService.getJobAppliedTo(objectId))
 
     @GetMapping("/getByUsername/getJobsAppliedToUserAndCheckCompletion/")
     fun getJobsAppliedToUserAndCheckCompleted(@RequestParam username: String,@RequestParam isCompleted: Boolean): Single<JobGetForListResponseCollection> =
@@ -50,16 +51,16 @@ class JobController(private val jobService: IJobService) {
             jobService.countJobsAppliedToUserAndCheckCompleted(username, isCompleted)
 
     @GetMapping("/getByLongDateBetween/")
-    fun getJobByLongDateBetween(@RequestParam startLong: Long, @RequestParam endLong: Long): Single<JobGetAllResponseCollection> =
+    fun getJobByLongDateBetween(@RequestParam startLong: Long, @RequestParam endLong: Long): Single<JobGetForListResponseCollection> =
             jobService.getJobByLongDateBetween(startLong, endLong)
 
-    @GetMapping("/getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompletion/")
-    fun getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(@RequestParam startLong: Long, @RequestParam endLong: Long, @RequestParam username: String, @RequestParam isCompleted: Boolean): Single<Int> =
-            jobService.getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(startLong, endLong, username, isCompleted)
+    @GetMapping("/getSumOfTimeSpentForSpecifiedMonthAndUser/")
+    fun getSumOfTimeSpentForSpecifiedMonthAndUser(@RequestParam startLong: Long, @RequestParam endLong: Long, @RequestParam username: String): Single<Int> =
+            jobService.getSumOfTimeSpentForSpecifiedMonthAndUser(startLong, endLong, username)
 
-    @GetMapping("/getJobsForSpecifiedMonthAndUserAndCheckCompleted/")
-    fun getJobsForSpecifiedMonthAndUserAndCheckCompleted(@RequestParam startLong: Long, @RequestParam endLong: Long, @RequestParam username: String): Single<JobGetForListResponseCollection> =
-            jobService.getJobsForSpecifiedMonthAndUserAndCheckCompleted(startLong, endLong, username)
+    @GetMapping("/getJobsForSpecifiedMonthAndUser/")
+    fun getJobsForSpecifiedMonthAndUser(@RequestParam startLong: Long, @RequestParam endLong: Long, @RequestParam username: String): Single<JobGetForListHoursResponseCollection> =
+            jobService.getJobsForSpecifiedMonthAndUser(startLong, endLong, username)
 
     @GetMapping("/getAllTimeSpentForUserPerMonth/")
     fun getAllTimeSpentForUserPerMonth(@RequestParam username: String): Single<JobTimeSpentResponseCollection> =
@@ -68,6 +69,11 @@ class JobController(private val jobService: IJobService) {
     @PutMapping("/addJobApplyTo")
     fun addJobApplyTo(@RequestBody jobApplyToRequest: JobApplyToRequest): Single<JobResponse> =
             jobService.addJobApplyTo(jobApplyToRequest)
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/addTime")
+    fun addTimeSpent(@RequestBody jobAddTimeSpentRequest: JobAddTimeSpentRequest): Mono<JobResponse> =
+            singleToMono(jobService.addTimeSpent(jobAddTimeSpentRequest))
 
     @PutMapping
     fun updateJob(@RequestBody jobRequestUpdate: JobRequestUpdate): Single<JobResponse> =

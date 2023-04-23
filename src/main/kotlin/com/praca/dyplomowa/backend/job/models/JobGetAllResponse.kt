@@ -14,7 +14,6 @@ data class JobGetAllResponse(
         val jobType: JobType,
         val dateOfCreation: Long,
         val plannedDate: Long?,
-        val timeSpent: Int,
         val note: String?,
         val isCompleted: Boolean,
         val createdBy: JobUserResponse,
