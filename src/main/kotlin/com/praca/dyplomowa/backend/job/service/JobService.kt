@@ -32,8 +32,10 @@ class JobService(
                     user = it.first,
                     jobType = it.second,
                     client = it.third
-                )
-            }.doOnSuccess { logger.info("Succesfully created job with id: ${it.id}") }
+                ).map { it.toNewJobResponse() }
+            }.doOnSuccess {
+                logger.info("Succesfully created job with id: ${it.id}")
+            }
 
     private fun getUserAndJobTypeAndClientForNewJob(request: JobRequest) =
             Single.zip(
@@ -50,12 +52,15 @@ class JobService(
     override fun addJobApplyTo(request: JobApplyToRequest): Single<JobResponse> =
             jobRepository.findById(request.objectId).toSingle().flatMap {
                 saveJob(it.copy(jobAppliedTo = request.jobAppliedTo))
-            }.doOnSuccess { logger.info("Succesfully applied job to with id: ${it.id} for: ${request.jobAppliedTo}") }
+                        .map {
+                            it.toJobAppliedToResponse()
+                        }
+            }.doOnSuccess {
+                logger.info("Succesfully applied job to with id: ${it.id} for: ${request.jobAppliedTo}")
+            }
 
     fun saveJob(job: Job) =
-            jobRepository.save(job).map {
-                it.toNewJobResponse()
-            }
+            jobRepository.save(job)/*.map { it.toNewJobResponse() }*/
 
     override fun getJobs(): Single<JobGetAllResponseCollection> =
             jobRepository.findAll(Sort.by(Sort.Direction.DESC, "dateOfCreation")).toList().map {
@@ -153,7 +158,9 @@ class JobService(
 
     override fun deleteJob(objectId: String): Single<JobResponse> =
             jobRepository.deleteById(objectId).toSingleDefault(deleteResponse())
-                    .doOnSuccess { logger.info("Succesfully deleted job") }
+                    .doOnSuccess {
+                        logger.info("Succesfully deleted job")
+                    }
 
     override fun updateJob(request: JobRequestUpdate): Single<JobResponse> =
             getJobAndJobTypeAndClientForJobUpdate(request).flatMap {
@@ -166,8 +173,12 @@ class JobService(
                                 note = request.note,
                                 isCompleted = request.isCompleted,
                         )
-                )
-            }.doOnSuccess { logger.info("Succesfully modified job with id: ${it.id}") }
+                ).map {
+                    it.toJobUpdateResponse()
+                }
+            }.doOnSuccess {
+                logger.info("Succesfully modified job with id: ${it.id}")
+            }
 
     override fun addTimeSpent(request: JobAddTimeSpentRequest): Single<JobResponse> =
             jobRepository.findById(request.objectId).toSingle().flatMap {
@@ -175,8 +186,12 @@ class JobService(
                         it.copy(
                                 timeSpent = request.timeSpentMap
                         )
-                )
-            }.doOnSuccess { logger.info("Succesfully added time spent in job with id: ${it.id} for: ${request.timeSpentMap}") }
+                ).map {
+                    it.toJobAddTimeToResponse()
+                }
+            }.doOnSuccess {
+                logger.info("Succesfully added time spent in job with id: ${it.id} for: ${request.timeSpentMap}")
+            }
 
     private fun getJobAndJobTypeAndClientForJobUpdate(request: JobRequestUpdate) =
             Single.zip(
@@ -211,6 +226,28 @@ class JobService(
                     status = true,
                     message = "Succesfully created new job"
             )
+
+    private fun Job.toJobAppliedToResponse() =
+            JobResponse(
+                    id = this.id,
+                    status = true,
+                    message = "Succesfully applied users to job"
+            )
+
+    private fun Job.toJobAddTimeToResponse() =
+            JobResponse(
+                    id = this.id,
+                    status = true,
+                    message = "Succesfully applied users hours to job"
+            )
+
+    private fun Job.toJobUpdateResponse() =
+            JobResponse(
+                    id = this.id,
+                    status = true,
+                    message = "Succesfully updated job"
+            )
+
 
     private fun Job.toGetJobAppliedToResponse() =
             JobAppliedToResponse(

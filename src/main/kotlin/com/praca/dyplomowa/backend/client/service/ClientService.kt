@@ -17,12 +17,16 @@ class ClientService(
 ): IClientService {
 
     override fun addClient(clientRequest: ClientRequest): Single<ClientResponse> =
-            saveClient(clientRequest.toClient())
-                    .doOnSuccess { logger.info("Succesfully created client with id: ${it.id}") }
-                    .onErrorReturn { errorResponse() }
+            saveClient(clientRequest.toClient()).map { it.toNewClientResponse() }
+                    .doOnSuccess {
+                        logger.info("Succesfully created client with id: ${it.id}")
+                    }
+                    .onErrorReturn {
+                        errorResponse()
+                    }
 
     private fun saveClient(client: Client) =
-            clientRepository.save(client).map { it.toNewClientResponse() }
+            clientRepository.save(client)
 
     override fun getClients(): Single<ClientGetAllResponseCollection> =
             clientRepository.findAll(Sort.by(Sort.Direction.ASC, "name")).toList().map {
@@ -48,8 +52,15 @@ class ClientService(
                 phoneNumber = clientRequestUpdate.phoneNumber,
                 email = clientRequestUpdate.email
                 ))
-            }.doOnSuccess { logger.info("Succesfully modified client with id: ${it.id}") }
-             .onErrorReturn { errorResponse() }
+            }.map {
+                it.toUpdateClientResponse()
+            }
+            .doOnSuccess {
+                logger.info("Succesfully modified client with id: ${it.id}")
+            }
+            .onErrorReturn {
+                errorResponse()
+            }
 
     override fun deleteClient(objectId: String): Single<ClientResponse> =
             clientRepository.findById(objectId).toSingle().flatMap {
@@ -59,7 +70,12 @@ class ClientService(
                                 false -> Single.fromCallable{ errorResponse() }
                             }
                         }
-                    }.doOnSuccess { logger.info("Succesfully deleted client") }
+                    }.doOnSuccess {
+                when(it.status){
+                    true -> logger.info("Succesfully deleted client")
+                    false -> logger.info("Trying to delete applied client")
+                }
+            }
 
     private fun errorResponse() =
             ClientResponse(
@@ -78,6 +94,13 @@ class ClientService(
                     id = this.id,
                     status = true,
                     message = "Succesfully created new client"
+            )
+
+    private fun Client.toUpdateClientResponse() =
+            ClientResponse(
+                    id = this.id,
+                    status = true,
+                    message = "Succesfully updated client"
             )
 
     private fun ClientRequest.toClient() =
