@@ -34,7 +34,6 @@ class SecurityConfig {
                     .authorizeExchange()
                     .pathMatchers(HttpMethod.GET, "/").permitAll()
                     .pathMatchers(HttpMethod.POST, "/", "/auth/**").permitAll()
-//                    .anyExchange().permitAll()/*.authenticated()*/
                     .anyExchange().authenticated()
                     .and()
                     .addFilterAt(AuthFilter(jwtService), SecurityWebFiltersOrder.AUTHENTICATION)

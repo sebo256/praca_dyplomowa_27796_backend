@@ -1,6 +1,7 @@
 package com.praca.dyplomowa.backend.job.service
 
 import com.praca.dyplomowa.backend.job.models.*
+import com.praca.dyplomowa.backend.logger.IApplicationLogger
 import com.praca.dyplomowa.backend.mongoDb.Client
 import com.praca.dyplomowa.backend.mongoDb.Job
 import com.praca.dyplomowa.backend.mongoDb.JobType
@@ -11,9 +12,7 @@ import com.praca.dyplomowa.backend.mongoDb.repository.JobTypeRepository
 import com.praca.dyplomowa.backend.mongoDb.repository.UserRepository
 import io.reactivex.rxjava3.core.Single
 import org.springframework.data.domain.Sort
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.server.ResponseStatusException
 import java.time.Instant
 import java.time.ZoneId
 
@@ -22,7 +21,8 @@ class JobService(
         private val userRepository: UserRepository,
         private val jobRepository: JobRepository,
         private val jobTypeRepository: JobTypeRepository,
-        private val clientRepository: ClientRepository
+        private val clientRepository: ClientRepository,
+        private val logger: IApplicationLogger
 ):IJobService {
 
     override fun createJob(request: JobRequest): Single<JobResponse> =
@@ -32,7 +32,9 @@ class JobService(
                     user = it.first,
                     jobType = it.second,
                     client = it.third
-                )
+                ).map { it.toNewJobResponse() }
+            }.doOnSuccess {
+                logger.info("Succesfully created job with id: ${it.id}")
             }
 
     private fun getUserAndJobTypeAndClientForNewJob(request: JobRequest) =
@@ -48,10 +50,17 @@ class JobService(
             saveJob(request.toJob(user, jobType, client))
 
     override fun addJobApplyTo(request: JobApplyToRequest): Single<JobResponse> =
-            jobRepository.findById(request.objectId).toSingle().flatMap { saveJob(it.copy(jobAppliedTo = request.jobAppliedTo)) }
+            jobRepository.findById(request.objectId).toSingle().flatMap {
+                saveJob(it.copy(jobAppliedTo = request.jobAppliedTo))
+                        .map {
+                            it.toJobAppliedToResponse()
+                        }
+            }.doOnSuccess {
+                logger.info("Succesfully applied job to with id: ${it.id} for: ${request.jobAppliedTo}")
+            }
 
     fun saveJob(job: Job) =
-            jobRepository.save(job).map { it.toNewJobResponse() }
+            jobRepository.save(job)/*.map { it.toNewJobResponse() }*/
 
     override fun getJobs(): Single<JobGetAllResponseCollection> =
             jobRepository.findAll(Sort.by(Sort.Direction.DESC, "dateOfCreation")).toList().map {
@@ -101,32 +110,8 @@ class JobService(
             jobRepository.countAllByJobAppliedToContainingAndIsCompleted(username, isCompleted)
 
 
-    override fun getJobByLongDateBetween(startLong: Long, endLong: Long): Single<JobGetAllResponseCollection> =
+    override fun getJobByLongDateBetween(startLong: Long, endLong: Long): Single<JobGetForListResponseCollection> =
             jobRepository.findAllByPlannedDateBetween(startLong = startLong, endLong = endLong).toList().map {
-                JobGetAllResponseCollection(
-                        it.map {
-                            it.toJobResponse()
-                        }
-                )
-            }
-
-    override fun getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(startLong: Long, endLong: Long, username: String, isCompleted: Boolean): Single<Int> =
-            jobRepository.findAllByPlannedDateBetweenAndJobAppliedToContainingAndIsCompleted(
-                    startLong = startLong,
-                    endLong = endLong,
-                    jobAppliedTo = username,
-                    isCompleted = isCompleted
-            ).toList().map {
-                        it.sumOf { it.timeSpent }
-            }
-
-    override fun getJobsForSpecifiedMonthAndUserAndCheckCompleted(startLong: Long, endLong: Long, username: String): Single<JobGetForListResponseCollection> =
-            jobRepository.findAllByPlannedDateBetweenAndJobAppliedToContainingAndIsCompleted(
-                    startLong = startLong,
-                    endLong = endLong,
-                    jobAppliedTo = username,
-                    isCompleted = true
-            ).toList().map {
                 JobGetForListResponseCollection(
                         it.map {
                             it.toJobForListResponse()
@@ -134,14 +119,36 @@ class JobService(
                 )
             }
 
+    override fun getSumOfTimeSpentForSpecifiedMonthAndUser(startLong: Long, endLong: Long, username: String): Single<Int> =
+            jobRepository.findAllByPlannedDateBetweenAndJobAppliedToContaining(
+                    startLong = startLong,
+                    endLong = endLong,
+                    jobAppliedTo = username,
+            ).toList().map {
+                        it.sumOf { it.timeSpent!!.getValue(username) }
+            }
+
+    override fun getJobsForSpecifiedMonthAndUser(startLong: Long, endLong: Long, username: String): Single<JobGetForListHoursResponseCollection> =
+            jobRepository.findAllByPlannedDateBetweenAndJobAppliedToContaining(
+                    startLong = startLong,
+                    endLong = endLong,
+                    jobAppliedTo = username
+            ).toList().map {
+                JobGetForListHoursResponseCollection(
+                        it.map {
+                            it.toJobForListHoursResponse(username)
+                        }
+                )
+            }
+
 
     override fun getAllTimeSpentForUserPerMonth(username: String): Single<JobTimeSpentResponseCollection> =
-           jobRepository.findAllByJobAppliedToAndIsCompletedOrderByPlannedDateAsc(username, true).toList().map {
+           jobRepository.findAllByJobAppliedToContainingOrderByPlannedDateAsc(username).toList().map {
                JobTimeSpentResponseCollection(
                         it.map {
                             JobTimeSpentResponse(
                                     name = longToMonthYearString(it.plannedDate!!),
-                                    timeSpent = it.timeSpent
+                                    timeSpent = it.timeSpent!!.getValue(username)
                             )
                         }.groupingBy { it.name }
                                 .reduce { key, accumulator, element -> JobTimeSpentResponse(name = element.name, timeSpent = accumulator.timeSpent + element.timeSpent) }
@@ -151,6 +158,9 @@ class JobService(
 
     override fun deleteJob(objectId: String): Single<JobResponse> =
             jobRepository.deleteById(objectId).toSingleDefault(deleteResponse())
+                    .doOnSuccess {
+                        logger.info("Succesfully deleted job")
+                    }
 
     override fun updateJob(request: JobRequestUpdate): Single<JobResponse> =
             getJobAndJobTypeAndClientForJobUpdate(request).flatMap {
@@ -160,11 +170,27 @@ class JobService(
                                 subject =  request.subject,
                                 jobType = it.second,
                                 plannedDate = request.plannedDate,
-                                timeSpent = request.timeSpent,
                                 note = request.note,
                                 isCompleted = request.isCompleted,
                         )
-                )
+                ).map {
+                    it.toJobUpdateResponse()
+                }
+            }.doOnSuccess {
+                logger.info("Succesfully modified job with id: ${it.id}")
+            }
+
+    override fun addTimeSpent(request: JobAddTimeSpentRequest): Single<JobResponse> =
+            jobRepository.findById(request.objectId).toSingle().flatMap {
+                saveJob(
+                        it.copy(
+                                timeSpent = request.timeSpentMap
+                        )
+                ).map {
+                    it.toJobAddTimeToResponse()
+                }
+            }.doOnSuccess {
+                logger.info("Succesfully added time spent in job with id: ${it.id} for: ${request.timeSpentMap}")
             }
 
     private fun getJobAndJobTypeAndClientForJobUpdate(request: JobRequestUpdate) =
@@ -201,12 +227,35 @@ class JobService(
                     message = "Succesfully created new job"
             )
 
+    private fun Job.toJobAppliedToResponse() =
+            JobResponse(
+                    id = this.id,
+                    status = true,
+                    message = "Succesfully applied users to job"
+            )
+
+    private fun Job.toJobAddTimeToResponse() =
+            JobResponse(
+                    id = this.id,
+                    status = true,
+                    message = "Succesfully applied users hours to job"
+            )
+
+    private fun Job.toJobUpdateResponse() =
+            JobResponse(
+                    id = this.id,
+                    status = true,
+                    message = "Succesfully updated job"
+            )
+
+
     private fun Job.toGetJobAppliedToResponse() =
             JobAppliedToResponse(
                     id = this.id,
                     status = true,
                     message = "Sucessfuly get users applied to this job",
-                    jobAppliedTo = this.jobAppliedTo?: listOf()
+                    jobAppliedTo = this.jobAppliedTo?: listOf(),
+                    timeSpent = this.timeSpent
             )
 
     private fun Job.toGetDatesAndInfoResponse() =
@@ -222,9 +271,8 @@ class JobService(
                     client = client,
                     subject = this.subject,
                     jobType = jobType,
-                    dateOfCreation = this.dateOfCreation,
+                    dateOfCreation = System.currentTimeMillis(),
                     plannedDate = this.plannedDate,
-                    timeSpent = this.timeSpent,
                     note = this.note,
                     isCompleted = this.isCompleted,
                     createdBy = user
@@ -243,6 +291,20 @@ class JobService(
                     isCompleted = this.isCompleted
             )
 
+    private fun Job.toJobForListHoursResponse(username: String) =
+            JobGetForListHoursResponse(
+                    id = this.id,
+                    subject = this.subject,
+                    jobType = this.jobType.jobType,
+                    companyName = this.client.companyName,
+                    name = this.client.name,
+                    surname = this.client.surname,
+                    street = this.client.street,
+                    city = this.client.city,
+                    isCompleted = this.isCompleted,
+                    timeSpent = this.timeSpent!!.getValue(username)
+            )
+
     private fun Job.toJobResponse()=
             JobGetAllResponse(
                     id = this.id,
@@ -251,7 +313,6 @@ class JobService(
                     jobType = this.jobType,
                     dateOfCreation = this.dateOfCreation,
                     plannedDate = this.plannedDate,
-                    timeSpent = this.timeSpent,
                     note = this.note,
                     isCompleted = this.isCompleted,
                     createdBy = JobUserResponse(

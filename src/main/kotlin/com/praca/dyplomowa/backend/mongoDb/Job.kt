@@ -19,10 +19,10 @@ data class Job(
         val jobType: JobType,
         val dateOfCreation: Long,
         val plannedDate: Long?,
-        val timeSpent: Int,
         val note: String?,
         val isCompleted: Boolean,
         @DocumentReference
         val createdBy: User,
-        val jobAppliedTo: Collection<String>? = null
+        val jobAppliedTo: Collection<String>? = null,
+        val timeSpent: MutableMap<String, Int>? = mutableMapOf()
 )

@@ -9,5 +9,6 @@ data class JobAppliedToResponse(
         val id: ObjectId? = null,
         val status: Boolean,
         val message: String,
-        val jobAppliedTo: Collection<String>
+        val jobAppliedTo: Collection<String>,
+        val timeSpent: MutableMap<String, Int>?
 )

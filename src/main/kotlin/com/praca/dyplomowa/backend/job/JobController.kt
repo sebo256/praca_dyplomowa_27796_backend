@@ -1,7 +1,9 @@
 package com.praca.dyplomowa.backend.job
 
+import com.praca.dyplomowa.backend.client.models.ClientResponse
 import com.praca.dyplomowa.backend.job.models.*
 import com.praca.dyplomowa.backend.job.service.IJobService
+import com.praca.dyplomowa.backend.logger.IApplicationLogger
 import io.reactivex.rxjava3.core.Single
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
@@ -10,11 +12,10 @@ import org.springframework.web.server.ResponseStatusException
 import reactor.adapter.rxjava.RxJava3Adapter.singleToMono
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
-import java.util.NoSuchElementException
 
 @RestController
 @RequestMapping("/job")
-class JobController(private val jobService: IJobService) {
+class JobController(private val jobService: IJobService, val logger: IApplicationLogger) {
 
 
     @PostMapping
@@ -37,9 +38,10 @@ class JobController(private val jobService: IJobService) {
     fun getJobById(@PathVariable objectId: String): Single<JobGetAllResponse> =
             jobService.getJobById(objectId)
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/getById/jobAppliedTo/{objectId}")
-    fun getJobAppliedTo(@PathVariable objectId: String): Single<JobAppliedToResponse> =
-            jobService.getJobAppliedTo(objectId)
+    fun getJobAppliedTo(@PathVariable objectId: String): Mono<JobAppliedToResponse> =
+            singleToMono(jobService.getJobAppliedTo(objectId))
 
     @GetMapping("/getByUsername/getJobsAppliedToUserAndCheckCompletion/")
     fun getJobsAppliedToUserAndCheckCompleted(@RequestParam username: String,@RequestParam isCompleted: Boolean): Single<JobGetForListResponseCollection> =
@@ -50,16 +52,16 @@ class JobController(private val jobService: IJobService) {
             jobService.countJobsAppliedToUserAndCheckCompleted(username, isCompleted)
 
     @GetMapping("/getByLongDateBetween/")
-    fun getJobByLongDateBetween(@RequestParam startLong: Long, @RequestParam endLong: Long): Single<JobGetAllResponseCollection> =
+    fun getJobByLongDateBetween(@RequestParam startLong: Long, @RequestParam endLong: Long): Single<JobGetForListResponseCollection> =
             jobService.getJobByLongDateBetween(startLong, endLong)
 
-    @GetMapping("/getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompletion/")
-    fun getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(@RequestParam startLong: Long, @RequestParam endLong: Long, @RequestParam username: String, @RequestParam isCompleted: Boolean): Single<Int> =
-            jobService.getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(startLong, endLong, username, isCompleted)
+    @GetMapping("/getSumOfTimeSpentForSpecifiedMonthAndUser/")
+    fun getSumOfTimeSpentForSpecifiedMonthAndUser(@RequestParam startLong: Long, @RequestParam endLong: Long, @RequestParam username: String): Single<Int> =
+            jobService.getSumOfTimeSpentForSpecifiedMonthAndUser(startLong, endLong, username)
 
-    @GetMapping("/getJobsForSpecifiedMonthAndUserAndCheckCompleted/")
-    fun getJobsForSpecifiedMonthAndUserAndCheckCompleted(@RequestParam startLong: Long, @RequestParam endLong: Long, @RequestParam username: String): Single<JobGetForListResponseCollection> =
-            jobService.getJobsForSpecifiedMonthAndUserAndCheckCompleted(startLong, endLong, username)
+    @GetMapping("/getJobsForSpecifiedMonthAndUser/")
+    fun getJobsForSpecifiedMonthAndUser(@RequestParam startLong: Long, @RequestParam endLong: Long, @RequestParam username: String): Single<JobGetForListHoursResponseCollection> =
+            jobService.getJobsForSpecifiedMonthAndUser(startLong, endLong, username)
 
     @GetMapping("/getAllTimeSpentForUserPerMonth/")
     fun getAllTimeSpentForUserPerMonth(@RequestParam username: String): Single<JobTimeSpentResponseCollection> =
@@ -68,6 +70,11 @@ class JobController(private val jobService: IJobService) {
     @PutMapping("/addJobApplyTo")
     fun addJobApplyTo(@RequestBody jobApplyToRequest: JobApplyToRequest): Single<JobResponse> =
             jobService.addJobApplyTo(jobApplyToRequest)
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/addTime")
+    fun addTimeSpent(@RequestBody jobAddTimeSpentRequest: JobAddTimeSpentRequest): Mono<JobResponse> =
+            singleToMono(jobService.addTimeSpent(jobAddTimeSpentRequest))
 
     @PutMapping
     fun updateJob(@RequestBody jobRequestUpdate: JobRequestUpdate): Single<JobResponse> =
@@ -78,7 +85,16 @@ class JobController(private val jobService: IJobService) {
     fun deleteJob(@PathVariable objectId: String): Mono<JobResponse> =
             singleToMono(jobService.deleteJob(objectId))
 
+    @ExceptionHandler(IllegalStateException::class)
+    fun illeaglStateException(exc: IllegalStateException): Mono<JobResponse> {
+        logger.error("JobController " + exc.toString())
+        return ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR).toMono()
+    }
+
     @ExceptionHandler(NoSuchElementException::class)
-    fun noSuchElementExceptionJob(): Mono<JobResponse> =
-            ResponseStatusException(HttpStatus.NOT_FOUND).toMono()
+    fun noSuchElementExceptionJob(exc: NoSuchElementException): Mono<JobResponse> {
+        logger.error("JobController" + exc.toString())
+        return ResponseStatusException(HttpStatus.NOT_FOUND).toMono()
+    }
+
 }

@@ -13,11 +13,15 @@ interface JobRepository: RxJava3CrudRepository<Job, String>, RxJava3SortingRepos
 
     fun findAllByPlannedDateBetweenAndJobAppliedToContainingAndIsCompleted(startLong: Long, endLong: Long, jobAppliedTo: String, isCompleted: Boolean): Flowable<Job>
 
+    fun findAllByPlannedDateBetweenAndJobAppliedToContaining(startLong: Long, endLong: Long, jobAppliedTo: String): Flowable<Job>
+
     fun findAllByJobAppliedToContainingAndIsCompleted(jobAppliedTo: String, isCompleted: Boolean): Flowable<Job>
 
     fun countAllByJobAppliedToContainingAndIsCompleted(jobAppliedTo: String, isCompleted: Boolean): Single<Long>
 
     fun findAllByJobAppliedToAndIsCompletedOrderByPlannedDateAsc(username: String, isCompleted: Boolean): Flowable<Job>
+
+    fun findAllByJobAppliedToContainingOrderByPlannedDateAsc(username: String): Flowable<Job>
 
     fun countAllByClient(client: Client): Single<Long>
 }

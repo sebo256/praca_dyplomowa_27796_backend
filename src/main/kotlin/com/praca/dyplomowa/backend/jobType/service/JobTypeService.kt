@@ -1,6 +1,5 @@
 package com.praca.dyplomowa.backend.jobType.service
 
-import com.praca.dyplomowa.backend.job.models.JobGetAllResponseCollection
 import com.praca.dyplomowa.backend.jobType.models.JobTypeGetAllResponse
 import com.praca.dyplomowa.backend.jobType.models.JobTypeGetAllResponseCollection
 import com.praca.dyplomowa.backend.jobType.models.JobTypeRequest

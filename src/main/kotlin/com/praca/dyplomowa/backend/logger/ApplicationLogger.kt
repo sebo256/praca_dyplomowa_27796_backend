@@ -20,7 +20,7 @@ class ApplicationLogger: IApplicationLogger {
     }
 
     override fun error(message: String){
-        getLogger().warn(message)
+        getLogger().error(message)
     }
 
     override fun trace(message: String){

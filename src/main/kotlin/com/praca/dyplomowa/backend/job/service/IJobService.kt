@@ -23,15 +23,17 @@ interface IJobService {
 
     fun countJobsAppliedToUserAndCheckCompleted(username: String, isCompleted: Boolean): Single<Long>
 
-    fun getJobByLongDateBetween(startLong: Long, endLong: Long): Single<JobGetAllResponseCollection>
+    fun getJobByLongDateBetween(startLong: Long, endLong: Long): Single<JobGetForListResponseCollection>
 
-    fun getSumOfTimeSpentForSpecifiedMonthAndUserAndCheckCompleted(startLong: Long, endLong: Long, username: String, isCompleted: Boolean): Single<Int>
+    fun getSumOfTimeSpentForSpecifiedMonthAndUser(startLong: Long, endLong: Long, username: String): Single<Int>
 
-    fun getJobsForSpecifiedMonthAndUserAndCheckCompleted(startLong: Long, endLong: Long, username: String): Single<JobGetForListResponseCollection>
+    fun getJobsForSpecifiedMonthAndUser(startLong: Long, endLong: Long, username: String): Single<JobGetForListHoursResponseCollection>
 
     fun getAllTimeSpentForUserPerMonth(username: String): Single<JobTimeSpentResponseCollection>
 
     fun updateJob(request: JobRequestUpdate): Single<JobResponse>
+
+    fun addTimeSpent(request: JobAddTimeSpentRequest): Single<JobResponse>
 
     fun deleteJob(objectId: String): Single<JobResponse>
 }
