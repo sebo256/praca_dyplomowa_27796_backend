@@ -1,7 +1,9 @@
 package com.praca.dyplomowa.backend.job
 
+import com.praca.dyplomowa.backend.client.models.ClientResponse
 import com.praca.dyplomowa.backend.job.models.*
 import com.praca.dyplomowa.backend.job.service.IJobService
+import com.praca.dyplomowa.backend.logger.IApplicationLogger
 import io.reactivex.rxjava3.core.Single
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
@@ -13,7 +15,7 @@ import reactor.kotlin.core.publisher.toMono
 
 @RestController
 @RequestMapping("/job")
-class JobController(private val jobService: IJobService) {
+class JobController(private val jobService: IJobService, val logger: IApplicationLogger) {
 
 
     @PostMapping
@@ -83,7 +85,16 @@ class JobController(private val jobService: IJobService) {
     fun deleteJob(@PathVariable objectId: String): Mono<JobResponse> =
             singleToMono(jobService.deleteJob(objectId))
 
+    @ExceptionHandler(IllegalStateException::class)
+    fun illeaglStateException(exc: IllegalStateException): Mono<JobResponse> {
+        logger.error("JobController " + exc.toString())
+        return ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR).toMono()
+    }
+
     @ExceptionHandler(NoSuchElementException::class)
-    fun noSuchElementExceptionJob(): Mono<JobResponse> =
-            ResponseStatusException(HttpStatus.NOT_FOUND).toMono()
+    fun noSuchElementExceptionJob(exc: NoSuchElementException): Mono<JobResponse> {
+        logger.error("JobController" + exc.toString())
+        return ResponseStatusException(HttpStatus.NOT_FOUND).toMono()
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.praca.dyplomowa.backend.job.service
 
 import com.praca.dyplomowa.backend.job.models.*
+import com.praca.dyplomowa.backend.logger.IApplicationLogger
 import com.praca.dyplomowa.backend.mongoDb.Client
 import com.praca.dyplomowa.backend.mongoDb.Job
 import com.praca.dyplomowa.backend.mongoDb.JobType
@@ -20,7 +21,8 @@ class JobService(
         private val userRepository: UserRepository,
         private val jobRepository: JobRepository,
         private val jobTypeRepository: JobTypeRepository,
-        private val clientRepository: ClientRepository
+        private val clientRepository: ClientRepository,
+        private val logger: IApplicationLogger
 ):IJobService {
 
     override fun createJob(request: JobRequest): Single<JobResponse> =
@@ -31,7 +33,7 @@ class JobService(
                     jobType = it.second,
                     client = it.third
                 )
-            }
+            }.doOnSuccess { logger.info("Succesfully created job with id: ${it.id}") }
 
     private fun getUserAndJobTypeAndClientForNewJob(request: JobRequest) =
             Single.zip(
@@ -46,10 +48,14 @@ class JobService(
             saveJob(request.toJob(user, jobType, client))
 
     override fun addJobApplyTo(request: JobApplyToRequest): Single<JobResponse> =
-            jobRepository.findById(request.objectId).toSingle().flatMap { saveJob(it.copy(jobAppliedTo = request.jobAppliedTo)) }
+            jobRepository.findById(request.objectId).toSingle().flatMap {
+                saveJob(it.copy(jobAppliedTo = request.jobAppliedTo))
+            }.doOnSuccess { logger.info("Succesfully applied job to with id: ${it.id} for: ${request.jobAppliedTo}") }
 
     fun saveJob(job: Job) =
-            jobRepository.save(job).map { it.toNewJobResponse() }
+            jobRepository.save(job).map {
+                it.toNewJobResponse()
+            }
 
     override fun getJobs(): Single<JobGetAllResponseCollection> =
             jobRepository.findAll(Sort.by(Sort.Direction.DESC, "dateOfCreation")).toList().map {
@@ -147,6 +153,7 @@ class JobService(
 
     override fun deleteJob(objectId: String): Single<JobResponse> =
             jobRepository.deleteById(objectId).toSingleDefault(deleteResponse())
+                    .doOnSuccess { logger.info("Succesfully deleted job") }
 
     override fun updateJob(request: JobRequestUpdate): Single<JobResponse> =
             getJobAndJobTypeAndClientForJobUpdate(request).flatMap {
@@ -160,7 +167,7 @@ class JobService(
                                 isCompleted = request.isCompleted,
                         )
                 )
-            }
+            }.doOnSuccess { logger.info("Succesfully modified job with id: ${it.id}") }
 
     override fun addTimeSpent(request: JobAddTimeSpentRequest): Single<JobResponse> =
             jobRepository.findById(request.objectId).toSingle().flatMap {
@@ -169,7 +176,7 @@ class JobService(
                                 timeSpent = request.timeSpentMap
                         )
                 )
-            }
+            }.doOnSuccess { logger.info("Succesfully added time spent in job with id: ${it.id} for: ${request.timeSpentMap}") }
 
     private fun getJobAndJobTypeAndClientForJobUpdate(request: JobRequestUpdate) =
             Single.zip(

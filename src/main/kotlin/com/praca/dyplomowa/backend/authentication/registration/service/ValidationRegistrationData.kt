@@ -10,8 +10,8 @@ data class Validation(
 class ValidationRegistrationData(val data: RegistrationRequest) {
     fun validate(): Validation =
             Validation(
-                    status = status,
-                    messages = messages
+                    status = allValidation().filterNotNull().isEmpty(),
+                    messages = allValidation().filterNotNull()
             )
 
     fun allValidation() =
@@ -22,28 +22,20 @@ class ValidationRegistrationData(val data: RegistrationRequest) {
                     statusMessage(validateNameAndSurname(data.surname), "Wrong surname")
             )
 
-    private val messages: List<String>
-        get() = allValidation().filterNotNull()
+    private fun validateUsername(username: String): Boolean =
+            username.length in 4..20 && username.contains(USERNAME_PATTERN)
 
+    private fun validatePassword(password: String): Boolean =
+            password.length in 8..30 && password.contains(PASSWORD_PATTERN)
 
-    private val status: Boolean
-         get() = messages.isEmpty()
+    private fun validateNameAndSurname(name: String): Boolean =
+            name.length in 2..25 && name.contains(NAME_PATTERN)
 
-    private fun validateUsername(username: String) =
-            username.length > 3 && username.length < 20 && username.contains(USERNAME_PATTERN)
-
-    private fun validatePassword(password: String) =
-            password.length > 7 && password.length < 30 && password.contains(PASSWORD_PATTERN)
-
-    private fun validateNameAndSurname(name: String) =
-            name.length > 2 && name.length < 25 && name.contains(NAME_PATTERN)
-
-    private val statusMessage: (Boolean, String) -> String? = { status, message ->
-        when(status) {
-            false -> message
-            true -> null
-        }
-    }
+    private fun statusMessage(status: Boolean, message: String): String? =
+            when(status){
+                true -> null
+                false -> message
+            }
 
     companion object{
         val PASSWORD_PATTERN = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#\$%]).{8,30}\$".toRegex()

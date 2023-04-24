@@ -1,6 +1,7 @@
 package com.praca.dyplomowa.backend.client.service
 
 import com.praca.dyplomowa.backend.client.models.*
+import com.praca.dyplomowa.backend.logger.IApplicationLogger
 import com.praca.dyplomowa.backend.mongoDb.Client
 import com.praca.dyplomowa.backend.mongoDb.repository.ClientRepository
 import com.praca.dyplomowa.backend.mongoDb.repository.JobRepository
@@ -11,11 +12,13 @@ import org.springframework.stereotype.Service
 @Service
 class ClientService(
         private val clientRepository: ClientRepository,
-        private val jobRepository: JobRepository
+        private val jobRepository: JobRepository,
+        private val logger: IApplicationLogger
 ): IClientService {
 
     override fun addClient(clientRequest: ClientRequest): Single<ClientResponse> =
             saveClient(clientRequest.toClient())
+                    .doOnSuccess { logger.info("Succesfully created client with id: ${it.id}") }
                     .onErrorReturn { errorResponse() }
 
     private fun saveClient(client: Client) =
@@ -45,7 +48,8 @@ class ClientService(
                 phoneNumber = clientRequestUpdate.phoneNumber,
                 email = clientRequestUpdate.email
                 ))
-            }.onErrorReturn { errorResponse() }
+            }.doOnSuccess { logger.info("Succesfully modified client with id: ${it.id}") }
+             .onErrorReturn { errorResponse() }
 
     override fun deleteClient(objectId: String): Single<ClientResponse> =
             clientRepository.findById(objectId).toSingle().flatMap {
@@ -55,7 +59,7 @@ class ClientService(
                                 false -> Single.fromCallable{ errorResponse() }
                             }
                         }
-                    }
+                    }.doOnSuccess { logger.info("Succesfully deleted client") }
 
     private fun errorResponse() =
             ClientResponse(

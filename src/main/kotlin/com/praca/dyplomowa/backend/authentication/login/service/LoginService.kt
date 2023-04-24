@@ -22,7 +22,7 @@ class LoginService(
         userRepository.findByUsername(request.username)
                 .flatMap { user ->
                     when(user.checkUserPassword(request)){
-                        true -> Single.just(user.successResponse())
+                        true -> Single.just(user.successResponse()).doOnSuccess { logger.info("${request.username} successfully logged in") }
                         false -> Single.just(errorResponse())
                     }
                 }
