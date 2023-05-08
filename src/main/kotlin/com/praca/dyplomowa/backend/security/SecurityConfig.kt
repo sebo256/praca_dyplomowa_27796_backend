@@ -32,7 +32,6 @@ class SecurityConfig {
                                          http: ServerHttpSecurity): SecurityWebFilterChain =
             http
                     .authorizeExchange()
-                    .pathMatchers(HttpMethod.GET, "/").permitAll()
                     .pathMatchers(HttpMethod.POST, "/", "/auth/**").permitAll()
                     .anyExchange().authenticated()
                     .and()

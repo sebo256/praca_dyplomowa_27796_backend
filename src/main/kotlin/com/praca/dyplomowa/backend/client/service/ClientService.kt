@@ -80,7 +80,7 @@ class ClientService(
     private fun errorResponse() =
             ClientResponse(
                     status = false,
-                    message = "Something went wrong in creating new job type"
+                    message = "Something went wrong in operation on Client"
             )
 
     private fun deleteResponse() =

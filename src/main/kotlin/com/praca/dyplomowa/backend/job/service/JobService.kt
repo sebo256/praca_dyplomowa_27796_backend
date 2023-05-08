@@ -151,8 +151,12 @@ class JobService(
                                     timeSpent = it.timeSpent!!.getValue(username)
                             )
                         }.groupingBy { it.name }
-                                .reduce { key, accumulator, element -> JobTimeSpentResponse(name = element.name, timeSpent = accumulator.timeSpent + element.timeSpent) }
-                                .values
+                                .reduce { key, accumulator, element ->
+                                    JobTimeSpentResponse(
+                                        name = element.name,
+                                        timeSpent = accumulator.timeSpent + element.timeSpent
+                                    )
+                                }.values
                 )
            }
 
